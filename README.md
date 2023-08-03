@@ -59,7 +59,7 @@ Nos projetos de Séries Temporais tenho como objetivo abordar desde o tratamento
 
 ### 3.1.1. TCC Graduação
 
-[Neste projeto](), revisitei meu código R das análises da minha monografia do curso de [Bacharel em Estatística da Universidade Federal de Juiz de Fora (UFJF)](https://www.ufjf.br/cursoestatistica/), intitulada <i>**Um Estudo Empı́rico do Desempenho de Combinações de Previsões**</i>. Concluí o curso em 2011, assim, depois de mais de 11 anos foram necessários alguns pequenos ajustes do código original (dado as atualizações das bibliotecas do R que utilizei) para que o mesmo funcionasse. Fiquei surpresa, pois realmente foram poucos ajustes, mas também me surprendeu o quanto o código pode ser otimizado. Não omimizei neste primeiro momento, mas assim que possível pretendo fazê-lo.
+[Neste projeto](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o), revisitei meu código R das análises da minha monografia do curso de [Bacharel em Estatística da Universidade Federal de Juiz de Fora (UFJF)](https://www.ufjf.br/cursoestatistica/), intitulada <i>**Um Estudo Empı́rico do Desempenho de Combinações de Previsões**</i>. Concluí o curso em 2011, assim, depois de mais de 11 anos foram necessários alguns pequenos ajustes do código original (dado as atualizações das bibliotecas do R que utilizei) para que o mesmo funcionasse. Fiquei surpresa, pois realmente foram poucos ajustes, mas também me surprendeu o quanto o código pode ser otimizado. Não omimizei neste primeiro momento, mas assim que possível pretendo fazê-lo.
 
 ### 3.1.2. Metodologias de Imputação de Dados
 

@@ -31,26 +31,25 @@ Após a aprovação do trabalho pela banca de professores da UFJF, publiquei um 
 
 Neste diretório os arquivos estão organizados da seguinte forma:
 
-:file_folder: [Dados]() : Pasta com as 10 séries originais usadas neste trabalho
+:file_folder: [Dados](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o/Dados) : Pasta com as 10 séries originais usadas neste trabalho
 
+:file_folder: [Gráficos](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o/Gr%C3%A1ficos) : Pasta com todos os gráficos gerados na análise
 
-:file_folder: [Gráficos]() : Pasta com todos os gráficos gerados na análise
+:file_folder: [Previsões](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o/Previs%C3%B5es) : Pasta com todas as previsões geradas na análise
 
-:file_folder: [Previsões]() :  Pasta com todas as previsões geradas na análise
+:page*facing_up: [Artigo_Brazilian_Journal* Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Artigo_Brazilian_Journal_%20Business.pdf): Artigo publicado no Brazilian Journal of Business
 
-:page_facing_up: [Artigo_Brazilian_Journal_ Business.pdf](): Artigo publicado no Brazilian Journal of Business
+:page_facing_up: [Monografia_Leiliane.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Monografia_Leiliane.pdf): Trabalho de Conclusão de Curso Completo
 
-:page_facing_up: [Monografia_Leiliane.pdf](): Trabalho de Conclusão de Curso Completo
+:page_facing_up: [Monografia_Leilane_Apt.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Monografia_Leilane_Apt.pdf): Apresentação do TCC na Defesa de Monografia
 
-:page_facing_up: [Monografia_Leilane_Apt.pdf](): Apresentação do TCC na Defesa de Monografia
+:page_facing_up: [XXII_SIMPEP_Art_266.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/XXII_SIMPEP_Art_266.pdf): Resumo publicado no SIMPEP
 
-:page_facing_up: [XXII_SIMPEP_Art_266.pdf](): Resumo publicado no SIMPEP
+:page_facing_up: [Monografia.r](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Monografia.r): Script em R
 
-:page_facing_up: [Monografia.r](): Script em R
+:page_facing_up: [OutputR_Monografia.txt](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/OutputR_Monografia.txt): Output do R
 
-:page_facing_up: [OutputR_Monografia.txt](): Output do R
-
-:chart_with_downwards_trend: [Tab_Erros.txt](): Tabela com os MSE dos modelos de previsão analisados
+:chart_with_downwards_trend: [Tab_Erros.txt](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Tab_Erros.txt): Tabela com os MSE dos modelos de previsão analisados
 
 # 3. Referências
 
