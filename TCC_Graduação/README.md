@@ -37,7 +37,7 @@ Neste diretório os arquivos estão organizados da seguinte forma:
 
 :file_folder: [Previsões](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o/Previs%C3%B5es) : Pasta com todas as previsões geradas na análise
 
-:page*facing_up: [Artigo_Brazilian_Journal* Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Artigo_Brazilian_Journal_%20Business.pdf): Artigo publicado no Brazilian Journal of Business
+:page_facing_up: [Artigo_Brazilian_Journal* Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Artigo_Brazilian_Journal_%20Business.pdf): Artigo publicado no Brazilian Journal of Business
 
 :page_facing_up: [Monografia_Leiliane.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Monografia_Leiliane.pdf): Trabalho de Conclusão de Curso Completo
 
