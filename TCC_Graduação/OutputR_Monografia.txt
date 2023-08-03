@@ -1,0 +1,2195 @@
+>                     ###################################
+>                     ####     MONOGRAFIA-LEILIANE   ####
+>                     ###################################
+>                                                                                      
+> ####################      Funções e Pacotes Necessários     ###################
+> 
+> #Pacotes necessários#  
+> install.packages("TSA")
+> library(TSA)                          
+> library(nortest)                    
+> library(car)  
+> 
+> ######################## Funçoes para Cálculo dos erros #######################
+> erros<- function (serie,intervalo=c(1,length(serie)),previsao) {
++ 	a=intervalo[1]
++ 	b=intervalo[2]
++ 	p=previsao[a:b]
++ 	n=length(p)	
++ 	s=serie[a:b]
++  	mape<-(1/n)*sum(100*(abs((s-p)/s)))
++   mse<-(1/n)* sum((s-p)^2)
++   mae<-(1/n)*sum(abs(s-p))
++   mpe<-(1/n)*sum(100*((s-p)/s))
++   erro<-matrix(c(mape,mse,mae,mpe),1,4)
++   colnames(erro)<-c("MAPE","MSE","MAE","MPE")
++   return(erro)}
+> 
+> ####################### Funções para geração de gráficos #######################
+> graf=function(serie,prev,nome){
++   par(mfrow=c(1,1))
++   plot(serie,lwd=2,type='l',ylim=c(min(serie,prev[-c(1,2)]),
++                                  max(serie,prev[-c(1,2)])
++ ), main=nome, xlab="Tempo") 
++ lines(prev,col="red",lwd=2) 
++ legend("topright",c("Série","Previsão")
++ ,col=c("black","red"),lty=1)} 
+> 
+> graf2=function(modelo){   
++   par(mfrow=c(2,1))
++   plot(modelo[,2],type="l",lty=1,lwd=2,ylim=c(min(modelo[,2],
++                                                   modelo[,3],modelo[,4]),
++                                               max(modelo[,2],modelo[,3],
++                                                   modelo[,4])),
++        xlim=c(-1,length(modelo[,1])))
++   lines(modelo[,3],lty=2,lwd=2)
++   lines(modelo[,4],lty=3,lwd=2)
++   legend("bottomleft",c("P1","P2","P3")
++          ,lty=c(1,2,3),cex=.7)
++   plot(modelo[,1],type="l",lwd=2,ylim=c(min(modelo[,1]-3),max(modelo[,1])))
++   legend("bottomleft",c("Constante"),lty=1,cex=.7) }
+> 
+> graf3=function(pesos){   
++   plot(pesos[1,],type="l",lty=1,lwd=2,ylim=c(min(pesos[1,],
++                                                  pesos[2,],pesos[3,]),
++                                              max(pesos[1,],pesos[2,],
++                                                  pesos[3,])),
++        xlim=c(-1,length(pesos[1,])))
++   lines(pesos[2,],lty=2,lwd=2)
++   lines(pesos[3,],lty=3,lwd=2)
++   legend("bottomleft",c("P1","P2","P3")
++          ,lty=c(1,2,3),cex=.7) }
+> 
+> ######################## Função para Previsão de Holt ########################
+> holt.function<- function (serie,intervalo,nome){  
++ #nome=nome da Série tem que ser entre ""
++   a<- b<- holt<- c()
++   menor1=10000000000000000000000000000
++   a[1]<-mean(serie[1:4])
++   b[1]<-(serie[4]-serie[1])/3
++   for(alpha in seq(0.05,0.95,by=0.05)){
++     for(beta1 in seq(0.05,0.95,by=0.05)){
++       for (i in 2: (length(serie)-1)) {                 
++         a[i]<- alpha*serie[i]+ (1-alpha)*(a[i-1]+b[i-1])
++         b[i]<- beta1*(a[i]-a[i-1])+(1-beta1)*b[i-1]
++         holt[i+1]<- a[i]+b[i]}
++       erro<-erros(serie,intervalo,holt)
++       if (menor1>erro[1,2]) {
++         menor1<-erro[1,2]
++         param=matrix(c(alpha,beta1),1,2)
++         prev<-holt}   }   }
++   colnames(param)=c("Alpha","Beta")     
++   print(erros(serie,intervalo,prev))
++   print(param)
++   nome=c("Previsão por Holt da Série",nome)
++   plot(serie,lwd=2,type='l',ylim=c(min(serie,holt[-c(1,2)]),
++     max(serie,holt[-c(1,2)])), main=nome, xlab="Tempo")
++   lines(prev,lwd=2,col='red')
++    legend("topright",c("Série","Previsão"),col=c("black","red"),lty=1)
++   return (prev)}
+> 
+> #################### Função para a escolha do modelo ARIMA ####################
+> ARIMA.function=function(serie,a) {  #a=lim inf para análise de erros
++   b=length(serie)
++   TAB=c()
++   for (i in 0:1){
++     for(j in 0:2){
++       for(k in 0:2){
++         ARIMA<-arimax(serie,order=c(j,i,k))                 
++           prev_ARIMA=fitted(ARIMA) 
++           Erro_ARIMA=erros(serie,intervalo=c(a,b),prev_ARIMA)  
++           aux=as.vector(ARIMA$residuals[a:b])              
++           D1=durbinWatsonTest(aux)  #correlação
++           T1=t.test(ARIMA$residuals[a:b])$p.value   ##média nula
++           LT1=lillie.test(ARIMA$residuals[a:b])$p.value     
++           A=c(Erro_ARIMA[1:2],ARIMA$aic,D1,T1,LT1)
++           TAB=rbind(TAB,A)
++           }}}
++           rownames(TAB)=c("ARIMA000","ARIMA001","ARIMA002","ARIMA100",
++           "ARIMA101","ARIMA102","ARIMA200","ARIMA201","ARIMA202","ARIMA010",
++           "ARIMA011","ARIMA012","ARIMA110","ARIMA111","ARIMA112","ARIMA210",
++           "ARIMA211","ARIMA212")
++           colnames(TAB)=c("MAPE","MSE","AIC","DW","T","LT")
++           return(TAB) }
+> 
+> #ARIMA2 deve ser usada em séries nãoo estacionárias
+> ARIMA2.function=function(serie,a) {
++   b=length(serie)
++   TAB=c()
++   i=1
++   for(j in 0:2){
++     for(k in 0:2){
++       ARIMA<-arimax(serie,order=c(j,i,k))                  
++       prev_ARIMA=fitted(ARIMA) 
++       Erro_ARIMA=erros(serie,intervalo=c(a,b),prev_ARIMA)  
++       aux=as.vector(ARIMA$residuals[a:b])              
++       D1=durbinWatsonTest(aux)  #correla??o
++       T1=t.test(ARIMA$residuals[a:b])$p.value   ##m?dia nula
++       LT1=lillie.test(ARIMA$residuals[a:b])$p.value     
++       A=c(Erro_ARIMA[1:2],ARIMA$aic,D1,T1,LT1)
++       TAB=rbind(TAB,A)
++     }}
++   rownames(TAB)=c("ARIMA010","ARIMA011","ARIMA012","ARIMA110","ARIMA111",
++                   "ARIMA112","ARIMA210","ARIMA211","ARIMA212")
++   colnames(TAB)=c("MAPE","MSE","AIC","DW","T","LT")
++   return(TAB) }
+> 
+> ######################### Funções do Modelo Estrutural #########################
+> # Nas funções abaixo temos as seguintes convenções:
+> #Thp = vetores de estado: vetores [mu b] 
+> # Rp =  matrizes de covariância 
+> #Thp(t): Theta(t|t-1)    (Theta 'previsto')
+> #Thc(t): Theta(t|t)      (Theta 'corrigido')
+> #A mesma convenção vale para o R: Rp, Rc  
+> #Thps,Thcs,Rps,Rcs,es: vetores contendo as séries de Thp,Thc,Rp,Rc,e
+> 
+> ####### apriori -Calcula média e variância apriore
+> apriori=function(Thc,Rc,G,W) { 
++   Thp=G%*%Thc
++   Rp=G%*%Rc%*%t(G)+W
++   mat=cbind(Thp,Rp)
++   return(mat)}
+> 
+> ####### aposteriori - Calcula média e variância aposteriori
+> aposteriori=function(Thp,Rp,FF,V,e){
++   ss= Rp%*%t(FF)%*%solve(V+FF%*%Rp%*%t(FF))
++   Thc= Thp + ss%*%e
++   Rc = Rp  - ss%*%FF%*%Rp
++   mat=cbind(Thc,Rc)
++   return(mat)}
+> 
+> ####### fk_forward ####### 
+> #% INPUT   
+> #% serie :          valores observados           (nx1)
+> #% F,G :        matrizes multiplicadoras     (1xd, dxd)  
+> #% V :          variância do erro            (1x1)
+> #% M :          variância do erro w          (dxd)
+> #% estado:      vetor de estado              (dx1)
+> #%
+> #% OUTPUT (dx8)                                         
+> #% Formato :  [y Thcs Rcs] onde as colunas são
+> #% coluna  1:   valores observados (x)             (dx1)
+> #% colunas 2-3: vetores de estado (Thcs) [mu b]    (dx2)
+> #% colunas 4-7: matrizes de covariância (Rcs)      (dx4)
+> #%              na forma [s11 s12 s21 s22]
+> #% coluna  8:   valores previstos (yp)             (dx1)
+> #%
+> #% Usa funções 'apriori', 'aposteriori'.
+> fk_forward=function(serie,FF,G,v,W,estado){ 
++ #% Loading e inicialization
++ n=dim(serie)[1]
++ d=dim(FF)[2] # número de colunas 
++ Thc=rbind(estado)
++ Rc=diag(1,2) 
++ 
++ xx=apriori(Thc,Rc,G,W)
++ Thp=cbind(xx[,1])
++ Rp=xx[,2:3]
++ yp=matrix(c(FF%*%Thp),1,1) 
++ e=serie[1,1]- FF%*%Thp
++ es=matrix(c(e),1,1)
++ 
++ xx=aposteriori(Thp,Rp,FF,v,e)
++ Thc=cbind(xx[,1])
++ Rc=xx[,2:3]
++ Thcs=cbind(t(Thc))
++ Rcs=matrix(c(Rc[1,],Rc[2,]),1,4)
++ #%-------------------------------- LOOP -------------------------------------- 
++ for(i in 2:n){
++   xx=apriori(Thc,Rc,G,W)
++   Thp=cbind(xx[,1])
++   Rp=xx[,2:3]
++   yp=cbind(yp,FF%*%Thp)        
++   e=serie[i,1]-yp[1,i]  
++   es=cbind(es,e)       
++  
++  xx=aposteriori(Thp,Rp,FF,v,e)
++  Thc=cbind(xx[,1])
++  Rc=xx[,2:3]
++  Thcs=rbind(Thcs,t(Thc))
++  aux=matrix(c(Rc[1,],Rc[2,]),1,4)
++  Rcs=rbind(Rcs,aux)}      
++  saida=cbind(serie,Thcs,Rcs,t(yp))
++  
++ return(saida)}
+> 
+> ####### Var_Mod_Est_Op ####### 
+> # Otimiza a variância do ME.
+> # os parâmetros a e b são os limites do trecho da série para  analisar os erros.
+> #z é a série a ser estudada, sigs é o vetor das variâncias iniciais do modelo.
+> #param é o vetor de variâncias do modelo.
+> Var_Mod_Est_Opt=function(z,a,b,sigs){
++   Mod_Est=function(param){ #função onde param será otimizado 
++     mu=z[1,1]                                      
++     bet=0 
++     sig_a=param[1]
++     sig_b=param[2]
++     sig_c=param[3]       
++     #% definição das matrizes do modelo. 
++     FF=matrix(c(1,0),1,2)
++     G=matrix(c(1,0,1,1),2,2)                    
++     v=sig_a^2    
++     estado=matrix(c(mu,bet),2,1)
++     W=matrix(c(sig_b^2,0,0,sig_c^2),2,2)
++     #amortecimento usando as equaçõess de Infield
++     v=1
++     lambda=(sig_c/sig_a)^2
++     Qr=matrix(0,2,2)
++     Qr[2,2]=lambda 
++     x=fk_forward(z,FF,G,v,Qr,estado)
++     prevs=x[,8] 
++     # c?lculo dos erros 
++     Z=z[,1]
++     erro=erros(Z,c(a,b),prevs) 
++     return(erro[2])}
++   op=optim(sigs,Mod_Est,method="BFGS")  #otimizando                      
++   return(op)}  
+> 
+> #######  Mod_Est_opt ####### 
+> #Função para previsão onde param já está otimizado
+> #nome=nome da série tem que ser entre ""
+>  Mod_Est_opt=function(z,param,nome){ 
++     mu=z[1,1]                                      
++     bet=0 
++     sig_a=param[1]
++     sig_b=param[2]
++     sig_c=param[3]       
++     #% definição das matrizes do modelo. 
++     FF=matrix(c(1,0),1,2)
++     G=matrix(c(1,0,1,1),2,2)                    
++     v=sig_a^2    
++     estado=matrix(c(mu,bet),2,1)
++     W=matrix(c(sig_b^2,0,0,sig_c^2),2,2)
++     #amortecimento usando as equações de Infield
++     v=1
++     lambda=(sig_c/sig_a)^2
++     Qr=matrix(0,2,2)
++     Qr[2,2]=lambda
++     x=fk_forward(z,FF,G,v,Qr,estado)
++     prevs=x[,8]
++     Z=z[,1]
++     nome=c("Previsão por Modelo Estrutural de Tendência Local da Série",nome)
++     plot(Z,lwd=2,type='l',ylim=c(min(Z,prevs[-c(1,2)]),max(Z,prevs
++     [-c(1,2)])), main=nome, xlab="Tempo")
++     lines(prevs,col="red",lwd=2)
++     legend("topright",c("Série","Previsão"),col=c("black","red"),lty=1)
++     return(prevs)}    
+> 
+> ####### Matriz de peso para Optimal ####### 
+> #A variável Ind indaga se é para ser Optimal
+> #com independência, default é sem independência.
+> Peso.function=function(serie,serie_holt,serie_arima,serie_ME,Ind=FALSE){
++   Erro_serie=cbind(serie-serie_holt,serie-serie_arima,serie-serie_ME)
++   S=cov(Erro_serie[c(-1,-2),])
++   E=cbind(rep(1,3))
++   if (Ind==TRUE){
++     v=diag(S)
++     v=rbind(v,v,v)
++     S=v*diag(3)} 
++   w=(solve(S)%*%E)/as.numeric((t(E)%*%solve(S)%*%E))  #matrix de pesos.
++   rownames(w)=list("Peso_holt","Peso_arima","Peso_ME")
++   return(w)}             
+>  
+> ################################################################################ 
+> ############################# Carregando as séries #############################
+> X=read.table("cow.txt")
+> cow=X[,1]     
+> X=read.table("buffsnow.txt")
+> buffsnow=X[,1]
+> X=read.table("calfem.txt")
+> calfem=X[1:120,1]
+> X=read.table("DowJones.txt")
+> DowJones=X[,1]
+> X=read.table("globtp.txt")
+> globtp=X[,1]
+> X=read.table("HURON.txt")
+> HURON=X[,1]
+> X=read.table("SHEEP.txt")
+> SHEEP=X[,1]
+> X=read.table("summer.txt")
+> summer=X[1:104,1]
+> X=read.table("ausgundeaths.txt")
+> ausgundeaths=X[,4]
+> X=read.table("Carga.txt")
+> Carga=X[,1]
+> rm(X)
+> ########################### Gráfico das Séries #################################
+> #par(ask=TRUE)
+> plot(cow,type="l",lwd=2,main="Série Cow",xlab="Tempo")
+> plot(buffsnow,type="l",lwd=2,main="Série Buffsnow",xlab="Tempo")
+> plot(calfem,type="l",lwd=2,main="Série CalFem",xlab="Tempo")
+> plot(DowJones,type="l",lwd=2,main="Série DowJones",xlab="Tempo")
+> plot(globtp,type="l",lwd=2,main="Série Globtp",xlab="Tempo")
+> plot(HURON,type="l",lwd=2,main="Série HURON",xlab="Tempo")
+> plot(SHEEP,type="l",lwd=2,main="Série SHEEP",xlab="Tempo")
+> plot(summer,type="l",lwd=2,main="Série Summer",xlab="Tempo")
+> plot(ausgundeaths,type="l",lwd=2,main="Série Ausgundeaths",xlab="Tempo")
+> plot(Carga,type="l",lwd=2,main="Série Carga",xlab="Tempo")
+> 
+> ################################################################################
+> ########################## Previsão individual #################################
+> 
+> ##################################### Holt #####################################
+> cow_holt=holt.function(cow,c(16,60),"COW")
+         MAPE      MSE      MAE        MPE
+[1,] 11.60715 52.67349 5.982383 -0.2690512
+     Alpha Beta
+[1,]  0.05 0.15
+> buffsnow_holt=holt.function(buffsnow,c(13,51),"Buffsnow")
+         MAPE      MSE      MAE       MPE
+[1,] 26.94756 510.5682 18.40023 -3.029848
+     Alpha Beta
+[1,]  0.35  0.2
+> calfem_holt=holt.function(calfem,c(25,96),"Calfem")
+        MAPE     MSE      MAE       MPE
+[1,] 16.4928 56.8131 6.277096 -2.919181
+     Alpha Beta
+[1,]  0.15 0.05
+> DowJones_holt=holt.function(DowJones,c(16,63),"DowJones")
+          MAPE       MSE       MAE        MPE
+[1,] 0.2800466 0.1944015 0.3246937 0.03882319
+     Alpha Beta
+[1,]  0.95  0.2
+> globtp_holt=holt.function(globtp,c(22,85),"Globtp")
+         MAPE       MSE        MAE       MPE
+[1,] 154.5025 0.0152776 0.09727397 -24.77488
+     Alpha Beta
+[1,]  0.25 0.05
+> HURON_holt=holt.function(HURON,c(20,79),"HURON")
+         MAPE       MSE      MAE         MPE
+[1,] 7.039209 0.6062838 0.605905 0.007612682
+     Alpha Beta
+[1,]  0.95 0.05
+> SHEEP_holt=holt.function(SHEEP,c(15,59),"SHEEP")
+         MAPE      MSE      MAE       MPE
+[1,] 3.576459 6309.489 63.32921 0.4821823
+     Alpha Beta
+[1,]  0.95 0.95
+> summer_holt=holt.function(summer,c(21,84),"Summer")
+         MAPE       MSE       MAE       MPE
+[1,] 4.721604 0.9502726 0.7227999 0.3903234
+     Alpha Beta
+[1,]   0.2 0.05
+> ausgundeaths_holt=holt.function(ausgundeaths,c(19,72),"Ausgundeaths")
+         MAPE       MSE       MAE       MPE
+[1,] 6.906917 0.6211189 0.5952149 0.2720313
+     Alpha Beta
+[1,]  0.95  0.1
+> Carga_holt=holt.function(Carga,c(19,73),"Carga")
+         MAPE      MSE      MAE       MPE
+[1,] 2.794089 3.631696 1.436171 0.1329663
+     Alpha Beta
+[1,]  0.55 0.15
+>                                
+> #################################### ARIMA #################################### 
+> #colocar na função arima: xreg = 1:length(serie) para aparecer o intercepto em
+> #arima com série diferenciada
+> #transformação do intercepto cte=intercepto*(1- os demais coeficientes de AR)
+> 
+> ########  Cow ########
+> #Estacionariedade:           
+> mean(cow[1:15])
+[1] 65.26667
+> mean(cow[16:60])
+[1] 51.73333
+> mean(cow[61:75])   
+[1] 47.73333
+> acf(cow, type="correlation",lwd=2,col="blue",main="FAC da Série Cow")
+> pacf(cow,lwd=2,col="blue",main="FACP da Série Cow")          
+> #Escolha do modelo
+> serie=cow[1:60]
+> ARIMA.function(serie,16) 
+             MAPE      MSE      AIC       DW           T         LT
+ARIMA000 13.31443 61.33139 447.0451 1.293519 0.002716526 0.45747705
+ARIMA001 12.88180 55.90243 442.7982 1.910693 0.014109863 0.63783690
+ARIMA002 12.64794 54.20706 442.2372 1.941699 0.025743183 0.08506019
+ARIMA100 12.54107 53.84856 439.5416 2.210618 0.046927443 0.38523000
+ARIMA101 12.23346 53.11437 434.4715 1.894489 0.151241230 0.15169681
+ARIMA102 11.97054 52.60264 435.8951 1.795076 0.174885782 0.79619374
+ARIMA200 12.12481 51.83151 436.9848 2.048309 0.114174653 0.04894915
+ARIMA201 12.07660 52.82069 436.0782 1.821407 0.167043560 0.43873797
+ARIMA202 12.15009 53.13773 438.1621 1.864580 0.153870685 0.22497181
+ARIMA010 13.62225 79.33333 450.6091 2.934454 0.973744943 0.33827639
+ARIMA011 12.49023 58.73425 426.2863 1.708623 0.396340420 0.52283693
+ARIMA012 12.48268 58.73666 428.2861 1.707101 0.400815546 0.50789227
+ARIMA110 11.99085 62.02428 435.6923 2.214311 0.970308042 0.51111541
+ARIMA111 12.48097 58.73771 428.2861 1.706680 0.401817815 0.50424272
+ARIMA112 12.46843 58.73897 430.2832 1.702197 0.408597631 0.48496624
+ARIMA210 12.13808 57.88323 430.3356 1.898660 0.885170340 0.13122580
+ARIMA211 12.62602 57.94803 430.0610 1.735694 0.248986114 0.46322097
+ARIMA212 12.48131 57.12383 431.4208 1.735667 0.202047265 0.26651646
+> #o melhor modelo é: 
+> prev_cow=arimax(cow[1:60],order=c(1,0,2))
+> tsdiag(prev_cow,60)                    
+> #Previsão:
+> int=prev_cow$coef[4]*(1-prev_cow$coef[1])
+> phi1=prev_cow$coef[1]
+> theta1=prev_cow$coef[2]
+> theta2=prev_cow$coef[3]
+> cow_arima=c()                 
+> cow_arima[1]=fitted(prev_cow)[1] #usar os valores previstos pelo R = 56.30899
+> cow_arima[2]=fitted(prev_cow)[2] #usar os valores previstos pelo R = 58.14536
+> for (i in 3:length(cow)){
++   cow_arima[i]=int+phi1*cow[i-1]+theta1*(cow[i-1]-cow_arima[i-1])
++   +theta2*(cow[i-2]-cow_arima[i-2])} 
+> graf(cow,cow_arima,"Previsão da Série Cow por ARIMA")      
+> 
+> ######## buffsnow ########
+> #Estacionariedade:           
+> mean(buffsnow[1:12])
+[1] 79.60833
+> mean(buffsnow[13:51])
+[1] 77.98718
+> mean(buffsnow[52:63])  
+[1] 88.48333
+> acf(buffsnow, type="correlation",lwd=2,col="blue",main="FAC da Série Buffsnow")
+> pacf(buffsnow,lwd=2,col="blue",main="FACP da Série Buffsnow")                
+> #Escolha do modelo
+> serie=buffsnow[1:51]
+> ARIMA.function(serie,13) 
+             MAPE      MSE      AIC       DW         T         LT
+ARIMA000 27.65839 538.6517 471.2493 1.123104 0.9198225 0.40254909
+ARIMA001 26.39410 480.7066 470.4929 1.536806 0.9262403 0.58509538
+ARIMA002 25.33820 444.8399 467.4460 1.758335 0.8923016 0.58316769
+ARIMA100 25.61243 450.3874 468.8401 1.832629 0.9354276 0.25509631
+ARIMA101 25.33803 430.3222 469.2364 1.850103 0.9929532 0.25534276
+ARIMA102 25.37454 447.6894 469.4261 1.740440 0.8891983 0.47428802
+ARIMA200 25.10466 432.5547 467.8808 1.760350 0.9804941 0.03752485
+ARIMA201 25.66782 446.3830 469.0808 1.818894 0.9356513 0.04700627
+ARIMA202 25.47781 447.0312 471.0352 1.808758 0.9191906 0.08793383
+ARIMA010 26.79984 609.7746 475.3867 2.873078 0.6926190 0.62904809
+ARIMA011 26.18538 453.61360.3 1.818328 0.2977734 0.03371938
+ARIMA012 26.15737 452.4060 462.3932 1.835729 0.2958293 0.07902422
+ARIMA110 25.70244 501.3315 463.0357 2.023116 0.5502431 0.18027106
+ARIMA111 26.18443 451.0925 462.3517 1.857544 0.2970497 0.11026720
+ARIMA112 25.12411 426.8665 463.5785 1.914523 0.5075182 0.11131537
+ARIMA210 25.67646 488.5971 464.7309 1.971236 0.4993189 0.24191966
+ARIMA211 24.96735 431.0389 462.3309 1.830561 0.5735000 0.05075694
+ARIMA212 26.11452 457.5515 463.6219 1.882190 0.4605674 0.02262855
+> #o melhor modelo é: 
+> prev_buffsnow=arimax(buffsnow[1:51],order=c(1,0,1))                  
+> tsdiag(prev_buffsnow,51)  
+> #Previsão:
+> int=prev_buffsnow$coef[3]*(1-prev_buffsnow$coef[1])
+> phi1=prev_buffsnow$coef[1]
+> theta1=prev_buffsnow$coef[2]
+> buffsnow_arima=c()                
+> buffsnow_arima[1]= fitted(prev_buffsnow)[1] #usar valores previstos pelo R = 83.57727
+> for (i in 2:length(buffsnow)){
++   buffsnow_arima[i]=int+phi1*buffsnow[i-1]+theta1*(buffsnow[i-1]
++   -buffsnow_arima[i-1])} 
+> graf(buffsnow,buffsnow_arima,"Previsão da Série Buffsnow por ARIMA") 
+>                                                                           
+> ######## Calfem ########
+> #Estacionariedade:           
+> mean(calfem[1:24])
+[1] 39.70833
+> mean(calfem[25:96])
+[1] 39.66667
+> mean(calfem[97:120])   #Parece  ser estacionário
+[1] 40.20833
+> acf(calfem, type="correlation",lwd=2,col="blue",main="FAC da Série CalFem")
+> pacf(calfem,lwd=2,col="blue",main="FACP da Série CalFem")         
+> #Escolha do modelo
+> serie=calfem[1:96]
+> ARIMA.function(serie,25) 
+             MAPE      MSE      AIC       DW         T         LT
+ARIMA000 15.73886 50.52789 656.4667 1.774048 0.9901827 0.13142933
+ARIMA001 15.59497 49.93052 657.8178 1.924673 0.9995695 0.28481730
+ARIMA002 15.67959 50.20627 659.6334 1.935325 0.9919418 0.15031691
+ARIMA100 15.59604 49.93518 657.7645 1.938178 0.9983385 0.21671436
+ARIMA101 15.67350 50.09154 659.6009 1.939099 0.9887923 0.21447054
+ARIMA102 14.99458 47.07101 658.6933 1.916444 0.9837942 0.80091011
+ARIMA200 15.67965 50.17014 659.6050 1.940096 0.9903384 0.13446807
+ARIMA201 15.69267 50.16113 661.5807 1.936389 0.9887101 0.14054165
+ARIMA202 15.65575 49.84354 663.5108 1.937759 0.9919136 0.13688520
+ARIMA010 19.53215 89.98611 705.3537 2.838092 0.9901914 0.02750716
+ARIMA011 15.66684 50.52822 655.2085 1.773448 0.9360542 0.15857894
+ARIMA012 15.49920 49.90004 656.4073 1.940983 0.9337784 0.16539512
+ARIMA110 18.11021 73.92987 682.4830 2.249026 0.9953167 0.09504847
+ARIMA111 15.49744 49.91237 656.3245 1.959806 0.9324885 0.11330221
+ARIMA112 15.61725 49.62559 658.5222 1.796455 0.9334761 0.34191909
+ARIMA210 17.32148 64.21390 673.9788 1.983550 0.9189334 0.44531657
+ARIMA211 15.59934 50.24201 658.0716 1.961932 0.9260576 0.09686367
+ARIMA212 15.49711 49.90915 660.3245 1.959637 0.9325499 0.11453606
+> #o melhor modelo é: 
+> prev_calfem=arimax(calfem[1:96],order=c(0,0,0)) 
+> tsdiag(prev_calfem,96) 
+> #Previsão:
+> calfem_arima=c(rep(mean(calfem[1:96]),120))
+> graf(calfem,calfem_arima,"Previsão da Série Calfem por ARIMA")     
+>                                                                               
+> ######## DowJones ########
+> #Estacionariedade:           
+> mean(DowJones[1:15])
+[1] 110.1487
+> mean(DowJones[16:63])
+[1] 115.2229
+> mean(DowJones[64:78])   #Parece  ser não-estacionário
+[1] 122.6913
+> acf(DowJones, type="correlation",lwd=2,col="blue",main="FAC da Série DowJones")
+> pacf(DowJones,lwd=2,col="blue",main="FACP da Série DowJones")    
+> #Diferenciando:
+> DowJones.dif=diff(DowJones)
+> mean(DowJones.dif[1:15])
+[1] -0.16
+> mean(DowJones.dif[16:63])
+[1] 0.3016667
+> mean(DowJones.dif[64:77])   #Parece  ser estacionário
+[1] -0.1278571
+> plot(DowJones.dif,type='l',lwd=2,main="Série DowJones Diferenciada") 
+> acf(DowJones.dif,lwd=2,col="blue",main="FAC da Série DowJones Diferenciada")
+> pacf(DowJones.dif,lwd=2,col="blue",main="FACP da Série DowJones Diferenciada")
+> rm(DowJones.dif)      
+> ##Escolha do modelo  
+> serie=DowJones[1:63]
+> ARIMA2.function(serie,16) #Feita uma pequena mudança nesta função pois é NE.
+              MAPE       MSE      AIC        DW            T         LT
+ARIMA010 0.3521480 0.2656604 81.97465 0.8900382 1.254367e-05 0.07139881
+ARIMA011 0.3063976 0.2101803 69.65019 1.6661325 1.024250e-03 0.51429416
+ARIMA012 0.3000184 0.1918516 66.48116 1.9538823 8.183235e-03 0.33209510
+ARIMA110 0.2977249 0.1873840 63.22725 2.0323696 3.448334e-02 0.76322601
+ARIMA111 0.2881596 0.1828514 64.05120 1.7904650 1.116872e-01 0.84034397
+ARIMA112 0.2831363 0.1776207 64.02389 1.8353772 1.498207e-01 0.71001541
+ARIMA210 0.2958984 0.1847749 64.59024 1.9347748 5.838977e-02 0.60954472
+ARIMA211 0.2957987 0.1846714 66.55535 1.9570119 4.513514e-02 0.58717878
+ARIMA212 0.2850039 0.1768992 65.81073 1.8748809 1.451791e-01 0.68087939
+> ##o melhor modelo é: 
+> prev_DowJones=arimax(DowJones[1:63],order=c(1,1,2),xreg=1:63)       
+> tsdiag(prev_DowJones,63)                           
+> #Previsão:
+> int=prev_DowJones$coef[4]*(1-prev_DowJones$coef[1])
+> phi1=prev_DowJones$coef[1]
+> theta1=prev_DowJones$coef[2]
+> theta2=prev_DowJones$coef[3]
+> DowJones_arima=c()                
+> DowJones_arima[1]=fitted(prev_DowJones)[1] #=110.8292       
+> DowJones_arima[2]=fitted(prev_DowJones)[2] #=111.0676
+> for (i in 3:length(DowJones)){
++   DowJones_arima[i]=int+(1+phi1)*DowJones[i-1]-phi1*DowJones[i-2]+theta1*
++   (DowJones[i-1]-DowJones_arima[i-1])+theta2*(DowJones[i-2]-DowJones_arima[i-2])} 
+> graf(DowJones,DowJones_arima,"Previsão da Série DowJones por ARIMA")   
+>                                                                                    
+> ######## globtp ########
+> #Estacionariedade:           
+> mean(globtp[1:21])
+[1] -0.3885714
+> mean(globtp[22:85])
+[1] -0.07609375
+> mean(globtp[86:106])   #Parece  ser não estacionário
+[1] 0.01190476
+> acf(globtp, type="correlation",lwd=2,col="blue",main="FAC da Série Globtp")
+> pacf(globtp,lwd=2,col="blue",main="FACP da Série Globtp")         
+> #Diferenciando:
+> globtp.dif=diff(globtp)
+> mean(globtp.dif[1:21])
+[1] 0.0147619
+> mean(globtp.dif[22:85])
+[1] -0.00140625
+> mean(globtp.dif[86:105])
+[1] 0.0115
+> plot(globtp.dif,type='l',lwd=2,main="Série Globtp Diferenciada") 
+> acf(globtp.dif,col="blue",lwd=2,main="FAC da Série Globtp Diferenciada")
+> pacf(globtp.dif,col="blue",lwd=2,main="FACP da Série Globtp Diferenciada") 
+> rm(globtp.dif)
+> #Escolha do modelo
+> serie=globtp[1:85]
+> ARIMA.function(serie,22)       
+             MAPE        MSE        AIC        DW            T          LT
+ARIMA000 303.6049 0.03663058  -17.67705 0.4708328 0.0008631936 0.005928277
+ARIMA001 210.0438 0.02245546  -65.82732 1.5159410 0.0095011107 0.592046854
+ARIMA002 188.1494 0.01752867  -84.60940 1.8874960 0.0400423839 0.855614575
+ARIMA100 153.0069 0.01541835 -106.15615 2.0860097 0.3453636168 0.810396156
+ARIMA101 135.1837 0.01515156 -106.09934 1.6842336 0.4319322886 0.176527405
+ARIMA102 148.6560 0.01356742 -111.98023 1.9612167 0.2953486181 0.386929719
+ARIMA200 148.2663 0.01535388 -104.81283 1.9704553 0.3763309351 0.491509044
+ARIMA201 142.6201 0.01371360 -110.56839 1.8544051 0.2881304233 0.304753821
+ARIMA202 148.5970 0.01349257 -110.16985 1.9836269 0.2856452812 0.429112367
+ARIMA010 182.5012 0.01730313 -101.37064 2.2359581 0.8216477524 0.609355930
+ARIMA011 144.3618 0.01514586 -108.02188 1.5489580 0.7399231558 0.185632715
+ARIMA012 152.2885 0.01359360 -114.86503 1.9660187 0.4989999930 0.428740131
+ARIMA110 169.6183 0.01679342 -101.88348 1.9880165 0.8504074330 0.746705969
+ARIMA111 147.8001 0.01374372 -113.42176 1.8572931 0.4773019407 0.438404670
+ARIMA112 152.2977 0.01351821 -113.06666 1.9896125 0.4800532760 0.597833187
+ARIMA210 171.0550 0.01597342 -105.54718 2.1071071 0.9356749489 0.174219362
+ARIMA211 149.7211 0.01312972 -114.39207 2.0546442 0.5073308687 0.391443239
+ARIMA212 144.3750 0.01278397 -113.47905 2.0054068 0.5838401588 0.395376552
+> #o melhor modelo é:
+> prev_globtp=arimax(globtp[1:85],order=c(1,1,1),xreg=1:85)
+> tsdiag(prev_globtp,85)
+> #Previsão:
+> int=prev_globtp$coef[3]*(1-prev_globtp$coef[1])
+> phi1=prev_globtp$coef[1]
+> theta1=prev_globtp$coef[2]
+> globtp_arima=c()                
+> globtp_arima[1]=fitted(prev_globtp)[1]  #= -0.39959438
+> globtp_arima[2]= fitted(prev_globtp)[2] #=-0.39153180    
+> for (i in 3:length(globtp)){
++  globtp_arima[i]=int+phi1*globtp[i-1]+globtp[i-1]-phi1*globtp[i-2]+theta1*
++   (globtp[i-1]-globtp_arima[i-1])}
+> graf(globtp,globtp_arima,"Previsão da Série Globtp por ARIMA")  
+> 
+> ######## HURON ########
+> #Estacionariedade:           
+> mean(HURON[1:19])
+[1] 10.56526
+> mean(HURON[20:79])
+[1] 8.707
+> mean(HURON[80:98])   ##Parece  ser estacionário
+[1] 8.381053
+> acf(HURON, type="correlation",lwd=2,col="blue",main="FAC da Série HURON")
+> pacf(HURON,lwd=2,col="blue",main="FACP da Série HURON")         
+> #Escolha do modelo
+> serie=HURON[1:79]
+> ARIMA.function(serie,20) 
+              MAPE       MSE      AIC        DW           T         LT
+ARIMA000 11.493444 1.3844154 267.3279 0.4120656 0.002533511 0.09571534
+ARIMA001  7.762335 0.6019220 201.9024 1.2122118 0.014380714 0.12489566
+ARIMA002  6.582723 0.4796179 179.0717 1.7893911 0.049499637 0.93336340
+ARIMA100  6.765251 0.5216992 171.8639 1.5376353 0.389293317 0.42066365
+ARIMA101  6.386477 0.4481067 167.1085 1.9217920 0.296229710 0.94220023
+ARIMA102  6.388909 0.4481820 169.0928 1.9039998 0.306632477 0.95377457
+ARIMA200  6.437088 0.4702857 168.9344 1.8415709 0.282069614 0.90069241
+ARIMA201  6.387360 0.4481116 169.1039 1.9166576 0.299227037 0.95704960
+ARIMA202  6.386793 0.4485181 170.9227 1.9585815 0.281210564 0.97671213
+ARIMA010  6.770157 0.5707100 171.0094 1.6360732 0.884606313 0.15589034
+ARIMA011  6.688657 0.5320288 170.1469 1.9480886 0.931009398 0.97255528
+ARIMA012  6.561940 0.4872872 167.8174 1.6951804 0.891192208 0.98303483
+ARIMA110  6.741516 0.5530717 171.5360 1.8034804 0.914897192 0.61261308
+ARIMA111  6.693250 0.5199978 171.2180 1.9159050 0.914322203 0.79203954
+ARIMA112  6.314733 0.4594311 165.0124 1.8173396 0.691905269 0.99199381
+ARIMA210  6.503404 0.4735862 166.2227 1.9392318 0.894730701 0.85796579
+ARIMA211  6.299490 0.4601038 164.4213 1.8480336 0.873584732 0.74348197
+ARIMA212  6.263209 0.4543039 166.1340 1.8685664 0.829629109 0.76803444
+> #o melhor modelo é: 
+> prev_HURON=arimax(HURON[1:79],order=c(2,0,0))                    
+> tsdiag(prev_HURON,79) 
+> #Previsão:
+> int=prev_HURON$coef[3]*(1-prev_HURON$coef[1]-prev_HURON$coef[2])
+> phi1=prev_HURON$coef[1]
+> phi2=prev_HURON$coef[2]
+> HURON_arima=c()                
+> HURON_arima[1]=fitted(prev_HURON)[1] #=9.762774
+> HURON_arima[2]=fitted(prev_HURON)[2] #=10.247705      
+> for (i in 3:length(HURON)){                                                                                  
++   HURON_arima[i]=int+phi1*HURON[i-1]+phi2*HURON[i-2]}
+> graf(HURON,HURON_arima,"Previsão da Série HURON por ARIMA")  
+> 
+> ######## SHEEP ########
+> #Estacionariedade:           
+> mean(SHEEP[1:16])
+[1] 2111.938
+> mean(SHEEP[15:59])
+[1] 1808.6
+> mean(SHEEP[60:73])   #Parece  ser estacionário
+[1] 1706.5
+> acf(SHEEP, type="correlation",lwd=2,col="blue",main="FAC da Série SHEEP")
+> pacf(SHEEP,lwd=2,col="blue",main="FACP da Série SHEEP")    
+> #Diferenciando:
+> SHEEP.dif=diff(SHEEP)  
+> plot(SHEEP.dif,type='l',main="Série SHEEP Difereniada") 
+> acf(SHEEP.dif,lwd=2,col="blue",main="FAC da Série SHEEP Diferenciada")
+> pacf(SHEEP.dif,lwd=2,col="blue",main="FACP da Série SHEEP Diferenciada")   
+> rm(SHEEP.dif)   
+> #Escolha do modelo
+> serie=SHEEP[1:59]
+> ARIMA.function(serie,15)           
+             MAPE       MSE      AIC        DW           T          LT
+ARIMA000 8.783661 43107.270 810.6979 0.1225429 0.005467932 0.003883767
+ARIMA001 5.084680 13271.793 744.7479 0.5559009 0.009953704 0.169292013
+ARIMA002 3.809200  7860.081 713.3566 1.2467819 0.032068595 0.166721707
+ARIMA100 3.454556  5830.926 694.3101 0.9841554 0.277883123 0.775520477
+ARIMA101 2.996710  4006.776 680.6583 1.7625258 0.347981141 0.178899865
+ARIMA102 2.947610  3916.375 678.4834 2.0221922 0.372557179 0.488394777
+ARIMA200 2.956327  3978.704 681.3253 1.7310244 0.356987478 0.260434204
+ARIMA201 2.911306  3817.823 680.6472 1.9724805 0.365136413 0.036785940
+ARIMA202 2.920934  3886.485 680.1985 2.0618588 0.368993395 0.640855475
+ARIMA010 3.578636  5924.711 677.8865 1.0280670 0.494266452 0.787779234
+ARIMA011 3.220720  4197.437 666.4342 1.8170700 0.729092627 0.149045966
+ARIMA012 3.140226  4149.758 666.4411 2.1109229 0.872497826 0.240994733
+ARIMA110 3.337528  4453.516 669.6754 1.6337198 0.847536304 0.115062629
+ARIMA111 3.205566  4131.611 667.9626 1.9200954 0.794855843 0.090542635
+ARIMA112 3.158341  4170.390 668.2666 2.0786778 0.836715022 0.421541431
+ARIMA210 3.011869  3953.128 662.1852 2.1930405 0.509069227 0.175071718
+ARIMA211 2.798269  3741.704 661.0407 2.0567855 0.240156084 0.199464803
+ARIMA212 2.867500  3854.764 661.2154 2.0264597 0.497489622 0.758211581
+> #o melhor modelo é: 
+> prev_SHEEP=arimax(SHEEP[1:59],order=c(2,1,1),xreg=1:59)  
+> tsdiag(prev_SHEEP,59)
+> #Previsão:
+> int=prev_SHEEP$coef[4]*(1-prev_SHEEP$coef[1]-prev_SHEEP$coef[2])
+> phi1=prev_SHEEP$coef[1]
+> phi2=prev_SHEEP$coef[2]
+> theta1=prev_SHEEP$coef[3]
+> SHEEP_arima=c()               
+> SHEEP_arima[1]=fitted(prev_SHEEP)[1]#=2200.786
+> SHEEP_arima[2]=fitted(prev_SHEEP)[2]#=2228.305
+> SHEEP_arima[3]=fitted(prev_SHEEP)[3]#=2395.930    
+> for (i in 4:length(SHEEP)){
++   SHEEP_arima[i]=int+(phi1+1)*SHEEP[i-1]+(phi2-phi1)*(SHEEP[i-2])-phi2*
++     SHEEP[i-3]+theta1*(SHEEP[i-1]-SHEEP_arima[i-1])} 
+> graf(SHEEP,SHEEP_arima,"Previsão da Série SHEEP por ARIMA")  
+> 
+> ######## summer ########
+> #Estacionariedade:           
+> mean(summer[1:20])
+[1] 15.6045
+> mean(summer[21:84])
+[1] 15.15531
+> mean(summer[85:104])   #Parece  ser estacionário
+[1] 14.887
+> acf(summer, type="correlation",lwd=2,col="blue",main="FAC da Série Summer")
+> pacf(summer,lwd=2,col="blue",main="FACP da Série Summer")         
+> #Escolha do modelo
+> serie=summer[1:84]
+> ARIMA.function(serie,21) 
+             MAPE       MSE      AIC       DW         T         LT
+ARIMA000 4.803689 0.8512006 222.5465 1.413588 0.3578044 0.20330890
+ARIMA001 4.634596 0.7781065 216.2787 2.001229 0.4216221 0.06867197
+ARIMA002 4.608097 0.7760447 218.1992 2.023049 0.4313532 0.09906617
+ARIMA100 4.580836 0.7809946 217.0226 1.940628 0.4476091 0.19705540
+ARIMA101 4.616346 0.7767738 218.2234 2.016711 0.4289735 0.08115043
+ARIMA102 4.544539 0.7634589 219.4171 2.059607 0.4346612 0.20341403
+ARIMA200 4.617543 0.7734852 218.0909 2.017656 0.4143587 0.13801391
+ARIMA201 4.621865 0.7741258 220.0797 2.021298 0.4159655 0.15162982
+ARIMA202 4.493082 0.7221093 216.5818 1.927148 0.3839446 0.92025964
+ARIMA010 5.576963 1.2032859 245.4117 2.555167 0.8331832 0.03226819
+ARIMA011 4.720797 0.8732423 222.5690 1.476651 0.3130732 0.03069519
+ARIMA012 4.668656 0.8064151 217.5337 1.995653 0.2305950 0.43944805
+ARIMA110 5.359353 1.1024502 241.0162 2.157416 0.8402396 0.31013087
+ARIMA111 4.649268 0.8098152 218.4594 1.922694 0.2249072 0.58482072
+ARIMA112 4.666447 0.8058817 219.5265 2.000885 0.2291780 0.43477276
+ARIMA210 5.127454 1.0272412 234.6414 2.188985 0.8218084 0.42106404
+ARIMA211 4.646152 0.8020813 219.1938 2.005779 0.2384624 0.51165526
+ARIMA212 4.644102 0.8017413 221.1921 2.004191 0.2390745 0.49284096
+> #o melhor modelo é: 
+> prev_summer=arimax(summer[1:84],order=c(1,0,0)) 
+> tsdiag(prev_summer,84)
+> #Previsão:
+> int=prev_summer$coef[2]*(1-prev_summer$coef[1])
+> phi1=prev_summer$coef[1]
+> summer_arima=c()               
+> summer_arima[1]=fitted(prev_summer)[1]#=15.32855 
+> for (i in 2:length(summer)){
++   summer_arima[i]=int+phi1*summer[i-1]}
+> graf(summer,summer_arima,"Previsão da Série Summer por ARIMA")   
+> 
+> ######## ausgundeaths ########
+> #Estacionariedade:           
+> mean(ausgundeaths[1:18])
+[1] 8.411923
+> mean(ausgundeaths[19:72])
+[1] 8.328784
+> mean(ausgundeaths[73:90])   #Parece  ser estacionário
+[1] 10.73805
+> acf(ausgundeaths, type="correlation",lwd=2,col="blue",main="FAC da Série Ausgundeaths")
+> pacf(ausgundeaths,lwd=2,col="blue",main="FACP da Série Ausgundeaths")  
+> #Diferenciando:       
+> ausgundeaths.dif=diff(ausgundeaths)  
+> plot(ausgundeaths.dif,type='l',main="Série Ausgundeaths Diferenciada") 
+> acf(ausgundeaths.dif,lwd=2,col="blue",main="FAC da Série Ausgundeaths Diferenciada")
+> pacf(ausgundeaths.dif,lwd=2,col="blue",main="FACP da Série Ausgundeaths Diferenciada") 
+> rm(ausgundeaths.dif)  
+> #Escolha do modelo
+> serie=ausgundeaths[1:72]
+> ARIMA.function(serie,19) 
+              MAPE       MSE      AIC        DW         T           LT
+ARIMA000 13.478989 2.2459502 252.6493 0.2581574 0.9199494 3.018626e-03
+ARIMA001  9.015499 1.1472782 211.1580 0.9928048 0.8745072 1.642512e-05
+ARIMA002  7.219916 0.6286823 174.0564 1.3800677 0.9385103 1.581180e-02
+ARIMA100  6.679298 0.5465522 167.8781 1.7896900 0.8785169 9.108915e-03
+ARIMA101  6.681989 0.5462246 169.8751 1.8001572 0.8786235 1.115407e-02
+ARIMA102  7.121221 0.5359444 169.2375 1.8811796 0.9467219 1.874152e-01
+ARIMA200  6.682770 0.5461354 169.8742 1.8030112 0.8785751 1.178653e-02
+ARIMA201  6.640659 0.5322052 170.1258 1.5749073 0.8953503 3.077789e-02
+ARIMA202  6.659062 0.4905491 166.2090 1.8102616 0.9549959 3.996886e-01
+ARIMA010  6.730050 0.5798092 167.0838 1.9892523 0.9742280 5.427536e-01
+ARIMA011  6.739374 0.5820279 168.7534 1.8496768 0.9842649 2.184038e-01
+ARIMA012  6.741240 0.5821783 170.7520 1.8471065 0.9867508 1.768053e-01
+ARIMA110  6.739007 0.5819866 168.7443 1.8464846 0.9820369 2.782654e-01
+ARIMA111  6.505430 0.5439605 167.3149 1.8407654 0.9444790 3.994460e-02
+ARIMA112  6.507341 0.5441918 169.3138 1.8341573 0.9453125 3.780237e-02
+ARIMA210  6.765728 0.5812942 170.6681 1.8337314 0.9665897 4.943732e-01
+ARIMA211  6.507789 0.5442436 169.3135 1.8325632 0.9454900 3.461015e-02
+ARIMA212  6.451811 0.5296965 169.4634 1.6140128 0.9350509 1.667400e-01
+> #o melhor modelo é: 
+> prev_ausgundeaths=arimax(ausgundeaths[1:72],order=c(1,1,1),xreg=1:72)
+> tsdiag(prev_ausgundeaths,72)  
+> #Previsão:
+> int=prev_ausgundeaths$coef[3]*(1-prev_ausgundeaths$coef[1])
+> phi1=prev_ausgundeaths$coef[1]
+> theta1=prev_ausgundeaths$coef[2]
+> ausgundeaths_arima=c() 
+> ausgundeaths_arima[1]=fitted(prev_ausgundeaths)[1]#=9.157297  
+> ausgundeaths_arima[2]=fitted(prev_ausgundeaths)[2]#=9.128523   
+> for (i in 3:length(ausgundeaths)){
++  ausgundeaths_arima[i]=int+phi1*ausgundeaths[i-1]+ausgundeaths[i-1]-phi1*
++   ausgundeaths[i-2]+theta1*(ausgundeaths[i-1]-ausgundeaths_arima[i-1])}
+> graf(ausgundeaths,ausgundeaths_arima,"Previsão da Série Ausgundeaths por ARIMA")  
+> 
+> ######## Carga ########
+> #Estacionariedade:           
+> mean(Carga[1:18])
+[1] 47.46219
+> mean(Carga[19:73])
+[1] 51.2553
+> mean(Carga[73:91])   #Parece  ser estacionário
+[1] 53.50115
+> acf(Carga, type="correlation",lwd=2,col="blue",main="FAC da Série Carga")
+> pacf(Carga,lwd=2,col="blue",main="FACP da Série Carga") 
+> #Diferenciando:      
+> Carga.dif=diff(Carga)  
+> plot(Carga.dif,type='l',main="Série Carga Diferenciada") 
+> acf(Carga.dif,lwd=2,col="blue",main="FAC da Série Carga Diferenciada")
+> pacf(Carga.dif,lwd=2,col="blue",main="FACP da Série Carga Diferenciada") 
+> rm(Carga.dif)          
+> #Escolha do modelo
+> serie=Carga[1:73]
+> ARIMA.function(serie,19) 
+             MAPE       MSE      AIC        DW          T         LT
+ARIMA000 5.176290 12.007845 400.8120 0.3078985 0.04424757 0.06424568
+ARIMA001 3.810104  5.653995 342.3486 1.4530429 0.10674086 0.44207936
+ARIMA002 3.691565  5.217933 333.5273 1.9329236 0.17685886 0.56894851
+ARIMA100 2.756016  3.381260 298.0964 2.4059989 0.60033084 0.63298738
+ARIMA101 2.700533  3.285219 299.7011 2.3013081 0.60359460 0.70754913
+ARIMA102 2.707563  3.283122 301.6774 2.3156274 0.59917458 0.69469180
+ARIMA200 2.704124  3.294211 299.7299 2.3078757 0.60426937 0.68077963
+ARIMA201 2.726362  3.352228 300.5458 2.4961604 0.58980213 0.28251034
+ARIMA202 2.619100  3.132974 300.6991 2.3484293 0.59191103 0.37014476
+ARIMA010 2.846543  3.723946 292.9042 2.4562038 0.68101902 0.49843696
+ARIMA011 2.761928  3.500460 293.6501 2.2548103 0.64743966 0.40442144
+ARIMA012 2.754196  3.487296 295.5146 2.2909624 0.63567907 0.33574154
+ARIMA110 2.780623  3.532895 293.7960 2.2755345 0.65524524 0.40743860
+ARIMA111 2.759058  3.494743 295.6165 2.2620052 0.64371772 0.44784617
+ARIMA112 2.764623  3.505609 297.5859 2.2406446 0.66719358 0.32060535
+ARIMA210 2.738004  3.448125 295.2482 2.2532627 0.63164929 0.30086937
+ARIMA211 2.604366  3.229516 293.3410 2.2263854 0.62144280 0.10671895
+ARIMA212 2.715296  3.447706 299.2515 2.2980850 0.71501716 0.60861994
+Warning message:
+In stats::arima(x = x, order = order, seasonal = seasonal, xreg = xreg,  :
+  possible convergence problem: optim gave code = 1
+> #o melhor modelo é: 
+> prev_Carga=arimax(Carga[1:73],order=c(0,1,1),xreg=1:73) 
+> tsdiag(prev_Carga,73) 
+> #Previsão:
+> int=prev_Carga$coef[2]
+> theta1=prev_Carga$coef[1]
+> Carga_arima=c() 
+> Carga_arima[1]=fitted(prev_Carga)[1]#=56.68548       
+> for (i in 2:length(Carga)){
++  Carga_arima[i]=int+theta1*(Carga[i-1]-Carga_arima[i-1])+Carga[i-1]} 
+> graf(Carga,Carga_arima,"Previsão da Série Carga por ARIMA")  
+> 
+> rm(theta1,theta2,phi1,phi2,int)
+
+> #############################  Modelos Estruturais #############################
+>       
+> ########### Cow
+> z=read.table("cow.txt")
+> op=Var_Mod_Est_Opt(z,16,60,c(100,1,1))
+> param=op$par   
+> cow_ME=Mod_Est_opt(z,param,"Cow")    
+> erros(cow,c(16,60),cow_ME)     #61,75
+         MAPE      MSE      MAE      MPE
+[1,] 12.89026 65.74969 6.692868 -1.06183
+> 
+> ########### buffsnow
+> z=read.table("buffsnow.txt")
+> op=Var_Mod_Est_Opt(z,13,51,c(100,1,1))
+> param=op$par   
+> buffsnow_ME=Mod_Est_opt(z,param,"Buffsnow")    
+> erros(buffsnow,c(13,51),buffsnow_ME)    #52,63
+        MAPE      MSE      MAE      MPE
+[1,] 27.0315 516.7902 18.46252 -2.05264
+> 
+> ########### calfem
+> z=read.table("calfem.txt")
+> z=cbind(z[1:120,1])
+> op=Var_Mod_Est_Opt(z,25,96,c(100,1,1))
+> param=op$par   
+> calfem_ME=Mod_Est_opt(z,param,"Calfem")    
+> erros(calfem,c(25,96),calfem_ME)#97,120
+         MAPE      MSE      MAE       MPE
+[1,] 17.51649 58.31294 6.404359 -7.028532
+> 
+> ########### DowJones
+> z=read.table("DowJones.txt")
+> op=Var_Mod_Est_Opt(z,16,63,c(10,10,100))
+> param=op$par   
+> DowJones_ME=Mod_Est_opt(z,param,"DowJones")    
+> erros(DowJones,c(16,63),DowJones_ME)     #64,78
+          MAPE       MSE       MAE         MPE
+[1,] 0.3298681 0.2329849 0.3840041 -0.00755444
+>            
+> ########### globtp
+> z=read.table("globtp.txt")
+> op=Var_Mod_Est_Opt(z,22,85,c(200,10,10))
+> param=op$par   
+> globtp_ME=Mod_Est_opt(z,param,"Globtp")    
+> erros(globtp,c(22,85),globtp_ME) #86,106    
+         MAPE        MSE        MAE       MPE
+[1,] 137.7238 0.01668501 0.09819912 0.4920911
+> 
+> ###########HURON
+> z=read.table("HURON.txt")
+> op=Var_Mod_Est_Opt(z,20,79,c(100,10,10))
+> param=op$par   
+> HURON_ME=Mod_Est_opt(z,param,"HURON")    
+> erros(HURON,c(20,79),HURON_ME)      #80,98
+         MAPE       MSE       MAE       MPE
+[1,] 9.271039 0.9743114 0.7912131 0.3322087
+> 
+> ########### SHEEP
+> z=read.table("SHEEP.txt")
+> op=Var_Mod_Est_Opt(z,15,59,c(10,1,100))
+> param=op$par   
+> SHEEP_ME=Mod_Est_opt(z,param,"SHEEP")    
+> erros(SHEEP,c(15,59),SHEEP_ME)    #60,73
+         MAPE      MSE      MAE       MPE
+[1,] 3.522425 6092.089 61.95556 0.4581527
+> 
+> ########### summer
+> z=read.table("summer.txt")
+> z=cbind(z[1:104,1])
+> op=Var_Mod_Est_Opt(z,21,84,c(100,1,1))
+> param=op$par   
+> summer_ME=Mod_Est_opt(z,param,"Summer")    
+> erros(summer,c(21,84),summer_ME) #85,104
+         MAPE       MSE       MAE        MPE
+[1,] 4.698588 0.9027949 0.7146144 -0.1420394
+>   
+> ########### ausgundeaths
+> z=read.table("ausgundeaths.txt")
+> z=cbind(z[,4])
+> op=Var_Mod_Est_Opt(z,19,72,c(100,1,10))
+> param=op$par   
+> ausgundeaths_ME=Mod_Est_opt(z,param,"Ausgundeaths")    
+> erros(ausgundeaths,c(19,72),ausgundeaths_ME)   #73,90
+         MAPE       MSE       MAE       MPE
+[1,] 7.907338 0.7648662 0.6757757 0.3405848
+> 
+> ########### Carga
+> z=read.table("Carga.txt")
+> op=Var_Mod_Est_Opt(z,19,73,c(100,15,10))
+> param=op$par   
+> Carga_ME=Mod_Est_opt(z,param,"Carga")    
+> erros(Carga,c(19,73),Carga_ME)        
+         MAPE      MSE      MAE        MPE
+[1,] 2.776781 3.722447 1.432125 0.01193471
+> 
+> rm(op,param)
+> 
+> ################################################################################
+> ############################ Combinação de Previsão ############################
+> 
+> ################################ Média Simples #################################
+> cow_MS=(cow_holt+cow_arima+cow_ME)/3
+> buffsnow_MS=(buffsnow_holt+buffsnow_arima+buffsnow_ME)/3
+> calfem_MS=(calfem_holt+calfem_arima+calfem_ME)/3
+> DowJones_MS=(DowJones_holt+DowJones_arima+DowJones_ME)/3
+> globtp_MS=(globtp_holt+globtp_arima+globtp_ME)/3
+> HURON_MS=(HURON_holt+HURON_arima+HURON_ME)/3
+> SHEEP_MS=(SHEEP_holt+SHEEP_arima+SHEEP_ME)/3
+> summer_MS=(summer_holt+summer_arima+summer_ME)/3
+> ausgundeaths_MS=(ausgundeaths_holt+ausgundeaths_arima+ausgundeaths_ME)/3
+> Carga_MS=(Carga_holt+Carga_arima+Carga_ME)/3
+> 
+> #Gráficos
+> #par(ask=TRUE)
+> graf(cow,cow_MS,"Previsão da Série Cow por Combinação: MÉDIA Simples")
+> graf(buffsnow,buffsnow_MS,"Previsão da Série Buffsnow por Combinação: MÉDIA Simples")
+> graf(calfem,calfem_MS,"Previsão da Série Calfem por Combinação: MÉDIA Simples")
+> graf(DowJones,DowJones_MS,"Previsão da Série DowJones por Combinação: MÉDIA Simples")
+> graf(globtp,globtp_MS,"Previsão da Série Globtp por Combinação: MÉDIA Simples")
+> graf(HURON,HURON_MS,"Previsão da Série HURON por Combinação: MÉDIA Simples")
+> graf(SHEEP,SHEEP_MS,"Previsão da Série SHEEP por Combinação: MÉDIA Simples")
+> graf(summer,summer_MS,"Previsão da Série Summer por Combinação: MÉDIA Simples")
+> graf(ausgundeaths,ausgundeaths_MS,"Previsão da Série Ausgundeaths por Combinação: MÉDIA Simples")
+> graf(Carga,Carga_MS,"Previsão da Série Carga por Combinação: MÉDIA Simples")      
+> 
+> #################################### Mediana ###################################
+> cow_Med=c()
+>   for(i in 1:75){
++   cow_Med[i]=median(cbind(cow_holt,cow_arima,cow_ME)[i,])}
+> buffsnow_Med=c()
+>   for(i in 1:63){
++   buffsnow_Med[i]=median(cbind(buffsnow_holt,buffsnow_arima,buffsnow_ME)[i,])}
+> calfem_Med=c()
+>   for(i in 1:120){
++   calfem_Med[i]=median(cbind(calfem_holt,calfem_arima,calfem_ME)[i,])}
+> DowJones_Med=c()
+>   for(i in 1:78){
++   DowJones_Med[i]=median(cbind(DowJones_holt,DowJones_arima,DowJones_ME)[i,])}
+> globtp_Med=c()
+>   for(i in 1:106){
++   globtp_Med[i]=median(cbind(globtp_holt,globtp_arima,globtp_ME)[i,])}
+> HURON_Med=c()
+>   for(i in 1:98){
++   HURON_Med[i]=median(cbind(HURON_holt,HURON_arima,HURON_ME)[i,])}
+> SHEEP_Med=c()
+>   for(i in 1:73){
++   SHEEP_Med[i]=median(cbind(SHEEP_holt,SHEEP_arima,SHEEP_ME)[i,])}
+> summer_Med=c()
+>   for(i in 1:104){
++   summer_Med[i]=median(cbind(summer_holt,summer_arima,summer_ME)[i,])}
+> ausgundeaths_Med=c()
+>   for(i in 1:90){
++   ausgundeaths_Med[i]=median(cbind(ausgundeaths_holt,ausgundeaths_arima,ausgundeaths_ME)[i,])}
+> Carga_Med=c()
+>   for(i in 1:91){
++   Carga_Med[i]=median(cbind(Carga_holt,Carga_arima,Carga_ME)[i,])}
+> 
+> #Gráficos
+> #par(ask=TRUE)
+> graf(cow,cow_Med,"Previsão da Série Cow por Combinação: Mediana")
+> graf(buffsnow,buffsnow_Med,"Previsão da Série Buffsnow por Combinação: Mediana")
+> graf(calfem,calfem_Med,"Previsão da Série Calfem por Combinação: Mediana")
+> graf(DowJones,DowJones_Med,"Previsão da Série DowJones por Combinação: Mediana")
+> graf(globtp,globtp_Med,"Previsão da Série Globtp por Combinação: Mediana")
+> graf(HURON,HURON_Med,"Previsão da Série HURON por Combinação: Mediana")
+> graf(SHEEP,SHEEP_Med,"Previsão da Série SHEEP por Combinação: Mediana")
+> graf(summer,summer_Med,"Previsão da Série Summer por Combinação: Mediana")
+> graf(ausgundeaths,ausgundeaths_Med,"Previsão da Série Ausgundeaths por Combinação: Mediana")
+> graf(Carga,Carga_Med,"Previsão da Série Carga por Combinação: Mediana")
+> 
+> ############################## Média dos Extremos ##############################
+> cow_MEx=c()
+>   for(i in 1:75){
++   cow_MEx[i]=mean(c(max(cbind(cow_holt,cow_arima,cow_ME)[i,]),min(cbind(cow_holt,
++   cow_arima,cow_ME)[i,]))) }                                        
+> buffsnow_MEx=c()
+>   for(i in 1:63){
++   buffsnow_MEx[i]=mean(c(max(cbind(buffsnow_holt,buffsnow_arima,buffsnow_ME)[i,]),
++   min(cbind(buffsnow_holt,buffsnow_arima,buffsnow_ME)[i,]))) }
+> calfem_MEx=c()
+>   for(i in 1:120){
++   calfem_MEx[i]=mean(c(max(cbind(calfem_holt,calfem_arima,calfem_ME)[i,]),min
++   (cbind(calfem_holt,calfem_arima,calfem_ME)[i,]))) }
+> DowJones_MEx=c()
+>   for(i in 1:78){
++   DowJones_MEx[i]=mean(c(max(cbind(DowJones_holt,DowJones_arima,DowJones_ME)[i,]),
++   min(cbind(DowJones_holt,DowJones_arima,DowJones_ME)[i,]))) }
+> globtp_MEx=c()
+>   for(i in 1:106){
++   globtp_MEx[i]=mean(c(max(cbind(globtp_holt,globtp_arima,globtp_ME)[i,]),min
++   (cbind(globtp_holt,globtp_arima,globtp_ME)[i,]))) }
+> HURON_MEx=c()
+>   for(i in 1:98){
++   HURON_MEx[i]=mean(c(max(cbind(HURON_holt,HURON_arima,HURON_ME)[i,]),min(cbind
++   (HURON_holt,HURON_arima,HURON_ME)[i,]))) }
+> SHEEP_MEx=c()
+>   for(i in 1:73){
++   SHEEP_MEx[i]=mean(c(max(cbind(SHEEP_holt,SHEEP_arima,SHEEP_ME)[i,]),min(cbind
++   (SHEEP_holt,SHEEP_arima,SHEEP_ME)[i,]))) }
+> summer_MEx=c()
+>   for(i in 1:104){
++   summer_MEx[i]=mean(c(max(cbind(summer_holt,summer_arima,summer_ME)[i,]),min
++   (cbind(summer_holt,summer_arima,summer_ME)[i,]))) }
+> ausgundeaths_MEx=c()
+>   for(i in 1:90){
++   ausgundeaths_MEx[i]=mean(c(max(cbind(ausgundeaths_holt,ausgundeaths_arima,
++   ausgundeaths_ME)[i,]),min(cbind(ausgundeaths,ausgundeaths_arima,ausgundeaths_ME)[i,]))) }
+> Carga_MEx=c()
+>   for(i in 1:91){
++   Carga_MEx[i]=mean(c(max(cbind(Carga_holt,Carga_arima,Carga_ME)[i,]),min(cbind
++   (Carga_holt,Carga_arima,Carga_ME)[i,]))) }  
+> 
+> #Gráficos
+> graf(cow,cow_MEx,"Previsão da Série Cow por Combinação: MÉDIA dos Extremos")
+> graf(buffsnow,buffsnow_MEx,"Previsão da Série Buffsnow por Combinação: MÉDIA dos Extremos")
+> graf(calfem,calfem_MEx,"Previsão da Série Calfem por Combinação: MÉDIA dos Extremos")
+> graf(DowJones,DowJones_MEx,"Previsão da Série DowJones por Combinação: MÉDIA dos Extremos")
+> graf(globtp,globtp_MEx,"Previsão da Série Globtp por Combinação: MÉDIA dos Extremos")
+> graf(HURON,HURON_MEx,"Previsão da Série HURON por Combinação: MÉDIA dos Extremos")
+> graf(SHEEP,SHEEP_MEx,"Previsão da Série SHEEP por Combinação: MÉDIA dos Extremos")
+> graf(summer,summer_MEx,"Previsão da Série Summer por Combinação: MÉDIA dos Extremos")
+> graf(ausgundeaths,ausgundeaths_MEx,"Previsão da Série Ausgundeaths por Combinação: MÉDIA dos Extremos")
+> graf(Carga,Carga_MEx,"Previsão da Série Carga por Combinação: MÉDIA dos Extremos")
+> 
+> ################################ Regressão ################################  
+> ########### Cow
+> Reg_cow=lm(cow[1:60]~cow_holt[1:60]+cow_arima[1:60]+cow_ME[1:60])
+> Reg_cow
+
+Call:
+lm(formula = cow[1:60] ~ cow_holt[1:60] + cow_arima[1:60] + cow_ME[1:60])
+
+Coefficients:
+    (Intercept)   cow_holt[1:60]  cow_arima[1:60]     cow_ME[1:60]  
+       -18.4005          -0.5241           2.0218          -0.2135  
+
+> cow_R=c()
+> for (i in 1:75) {
++ cow_R[i]= Reg_cow$coefficients[1]+Reg_cow$coefficients[2]*cow_holt[i]+
++   Reg_cow$coefficients[3]*cow_arima[i]+Reg_cow$coefficients[4]*cow_ME[i]}
+> 
+> ########### Buffsnow
+> Reg_buffsnow=lm(buffsnow[1:51]~buffsnow_holt[1:51]+buffsnow_arima[1:51]+buffsnow_ME[1:51])
+> Reg_buffsnow
+
+Call:
+lm(formula = buffsnow[1:51] ~ buffsnow_holt[1:51] + buffsnow_arima[1:51] + 
+    buffsnow_ME[1:51])
+
+Coefficients:
+         (Intercept)   buffsnow_holt[1:51]  buffsnow_arima[1:51]     buffsnow_ME[1:51]  
+            -11.1995                0.2772                1.2884               -0.4402  
+
+> buffsnow_R=c()
+> for(i in 1:63){
++ buffsnow_R[i]=Reg_buffsnow$coefficients[1]+Reg_buffsnow$coefficients[2]*buffsnow_holt[i]+
++ Reg_buffsnow$coefficients[3]*buffsnow_arima[i]+Reg_buffsnow$coefficients[4]*buffsnow_ME[i]}
+> 
+> ########### Calfem
+> Reg_calfem=lm(calfem[1:96]~calfem_holt[1:96]+calfem_arima[1:96]+calfem_ME[1:96])
+> Reg_calfem
+
+Call:
+lm(formula = calfem[1:96] ~ calfem_holt[1:96] + calfem_arima[1:96] + 
+    calfem_ME[1:96])
+
+Coefficients:
+       (Intercept)   calfem_holt[1:96]  calfem_arima[1:96]     calfem_ME[1:96]  
+         36.421125            0.007511                  NA            0.075786  
+
+> calfem_R=c()
+> for(i in 1:120){       #Não tem a componente arima pois as previsões são uma constante.
++ calfem_R[i]=Reg_calfem$coefficients[1]+Reg_calfem$coefficients[2]*calfem_holt[i]
++ +Reg_calfem$coefficients[4]*calfem_ME[i]}
+> 
+> ########### Dowjones
+> Reg_DowJones=lm(DowJones[1:63]~DowJones_holt[1:63]+DowJones_arima[1:63]+DowJones_ME[1:63])
+> Reg_DowJones
+
+Call:
+lm(formula = DowJones[1:63] ~ DowJones_holt[1:63] + DowJones_arima[1:63] + 
+    DowJones_ME[1:63])
+
+Coefficients:
+         (Intercept)   DowJones_holt[1:63]  DowJones_arima[1:63]     DowJones_ME[1:63]  
+             0.58187               0.16666               0.74815               0.08024  
+
+> DowJones_R=c()
+> for(i in 1:78){
++ DowJones_R[i]=Reg_DowJones$coefficients[1]+Reg_DowJones$coefficients[2]*DowJones_holt[i]+
++ Reg_DowJones$coefficients[3]*DowJones_arima[i]+Reg_DowJones$coefficients[4]*DowJones_ME[i]}
+> 
+> ########### Globtp
+> Reg_globtp=lm(globtp[1:85]~globtp_holt[1:85]+globtp_arima[1:85]+globtp_ME[1:85])
+> Reg_globtp
+
+Call:
+lm(formula = globtp[1:85] ~ globtp_holt[1:85] + globtp_arima[1:85] + 
+    globtp_ME[1:85])
+
+Coefficients:
+       (Intercept)   globtp_holt[1:85]  globtp_arima[1:85]     globtp_ME[1:85]  
+          -0.01283             0.14297             0.82727            -0.05191  
+
+> globtp_R=c()
+> for(i in 1:106){
++ globtp_R[i]=Reg_globtp$coefficients[1]+Reg_globtp$coefficients[2]*globtp_holt[i]+
++ Reg_globtp$coefficients[3]*globtp_arima[i]+Reg_globtp$coefficients[4]*globtp_ME[i]}
+> 
+> ########### HURON
+> Reg_HURON=lm(HURON[1:79]~HURON_holt[1:79]+HURON_arima[1:79]+HURON_ME[1:79])
+> Reg_HURON
+
+Call:
+lm(formula = HURON[1:79] ~ HURON_holt[1:79] + HURON_arima[1:79] + 
+    HURON_ME[1:79])
+
+Coefficients:
+      (Intercept)   HURON_holt[1:79]  HURON_arima[1:79]     HURON_ME[1:79]  
+          -0.6031            -0.3748             1.2750             0.1620  
+
+> HURON_R=c()
+> for(i in 1:98){
++ HURON_R[i]=Reg_HURON$coefficients[1]+Reg_HURON$coefficients[2]*HURON_holt[i]+
++ Reg_HURON$coefficients[3]*HURON_arima[i]+Reg_HURON$coefficients[4]*HURON_ME[i]}
+
+> ########### SHEEP
+> Reg_SHEEP=lm(SHEEP[1:59]~SHEEP_holt[1:59]+SHEEP_arima[1:59]+SHEEP_ME[1:59])
+> Reg_SHEEP
+
+Call:
+lm(formula = SHEEP[1:59] ~ SHEEP_holt[1:59] + SHEEP_arima[1:59] + 
+    SHEEP_ME[1:59])
+
+Coefficients:
+      (Intercept)   SHEEP_holt[1:59]  SHEEP_arima[1:59]     SHEEP_ME[1:59]  
+          63.7508             0.6983             0.9246            -0.6579  
+
+> SHEEP_R=c()
+> for(i in 1:73){
++ SHEEP_R[i]=Reg_SHEEP$coefficients[1]+Reg_SHEEP$coefficients[2]*SHEEP_holt[i]+
++ Reg_SHEEP$coefficients[3]*SHEEP_arima[i]+Reg_SHEEP$coefficients[4]*SHEEP_ME[i]}
+> 
+> ########### Summer
+> Reg_summer=lm(summer[1:84]~summer_holt[1:84]+summer_arima[1:84]+summer_ME[1:84])
+> Reg_summer
+
+Call:
+lm(formula = summer[1:84] ~ summer_holt[1:84] + summer_arima[1:84] + 
+    summer_ME[1:84])
+
+Coefficients:
+       (Intercept)   summer_holt[1:84]  summer_arima[1:84]     summer_ME[1:84]  
+            2.1420             -0.9152              1.3642              0.3993  
+
+> summer_R=c()
+> for(i in 1:104){
++ summer_R[i]=Reg_summer$coefficients[1]+Reg_summer$coefficients[2]*summer_holt[i]+
++ Reg_summer$coefficients[3]*summer_arima[i]+Reg_summer$coefficients[4]*summer_ME[i]}
+> 
+> ########### Ausgundeaths
+> Reg_ausgundeaths=lm(ausgundeaths[1:72]~ausgundeaths_holt[1:72]+ausgundeaths_arima[1:72]+ausgundeaths_ME[1:72])
+> Reg_ausgundeaths
+
+Call:
+lm(formula = ausgundeaths[1:72] ~ ausgundeaths_holt[1:72] + ausgundeaths_arima[1:72] + 
+    ausgundeaths_ME[1:72])
+
+Coefficients:
+             (Intercept)   ausgundeaths_holt[1:72]  ausgundeaths_arima[1:72]     ausgundeaths_ME[1:72]  
+                 1.26336                   0.38939                   0.36164                   0.09897  
+
+> ausgundeaths_R=c()
+> for(i in 1:90){
++ ausgundeaths_R[i]=Reg_ausgundeaths$coefficients[1]+Reg_ausgundeaths$coefficients[2]*ausgundeaths_holt[i]+
++ Reg_ausgundeaths$coefficients[3]*ausgundeaths_arima[i]+Reg_ausgundeaths$coefficients[4]*ausgundeaths_ME[i]}
+> 
+> ########### Carga
+> Reg_Carga=lm(Carga[1:73]~Carga_holt[1:73]+Carga_arima[1:73]+Carga_ME[1:73])
+> Reg_Carga
+
+Call:
+lm(formula = Carga[1:73] ~ Carga_holt[1:73] + Carga_arima[1:73] + 
+    Carga_ME[1:73])
+
+Coefficients:
+      (Intercept)   Carga_holt[1:73]  Carga_arima[1:73]     Carga_ME[1:73]  
+          10.4396             0.8667             0.2075            -0.2764  
+
+> Carga_R=c()
+> for(i in 1:91){
++ Carga_R[i]=Reg_Carga$coefficients[1]+Reg_Carga$coefficients[2]*Carga_holt[i]+
++ Reg_Carga$coefficients[3]*Carga_arima[i]+Reg_Carga$coefficients[4]*Carga_ME[i]}
+> 
+> #Gráficos
+> graf(cow,cow_R,"Previsão da Série Cow por Combinação: Regressão")
+> graf(buffsnow,buffsnow_R,"Previsão da Série Buffsnow por Combinação: Regressão")
+> graf(calfem,calfem_R,"Previsão da Série Calfem por Combinação: Regressão")
+> graf(DowJones,DowJones_R,"Previsão da Série DowJones por Combinação: Regressão")
+> graf(globtp,globtp_R,"Previsão da Série Globtp por Combinação: Regressão")
+> graf(HURON,HURON_R,"Previsão da Série HURON por Combinação: Regressão")
+> graf(SHEEP,SHEEP_R,"Previsão da Série SHEEP por Combinação: Regressão")
+> graf(summer,summer_R,"Previsão da Série Summer por Combinação: Regressão")
+> graf(ausgundeaths,ausgundeaths_R,"Previsão da Série Ausgundeaths por Combinação: Regressão")
+> graf(Carga,Carga_R,"Previsão da Série Carga por Combinação: Regressão")
+> 
+> ################################### Optimal ###################################
+> w_cow=Peso.function(cow[1:60],cow_holt[1:60],cow_arima[1:60],cow_ME[1:60])
+> cow_Op=cow_holt*w_cow[1,1]+cow_arima*w_cow[2,1]+cow_ME*w_cow[3,1]
+> 
+> w_buffsnow=Peso.function(buffsnow[1:51],buffsnow_holt[1:51],buffsnow_arima[1:51],buffsnow_ME[1:51])
+> buffsnow_Op=buffsnow_holt*w_buffsnow[1,1]+buffsnow_arima*w_buffsnow[2,1]+buffsnow_ME*w_buffsnow[3,1]
+> 
+> w_calfem=Peso.function(calfem[1:96],calfem_holt[1:96],calfem_arima[1:96],calfem_ME[1:96])
+> calfem_Op=calfem_holt*w_calfem[1,1]+calfem_arima*w_calfem[2,1]+calfem_ME*w_calfem[3,1]
+> 
+> w_DowJones=Peso.function(DowJones[1:63],DowJones_holt[1:63],DowJones_arima[1:63],DowJones_ME[1:63])
+> DowJones_Op=DowJones_holt*w_DowJones[1,1]+DowJones_arima*w_DowJones[2,1]+DowJones_ME*w_DowJones[3,1]
+> 
+> w_globtp=Peso.function(globtp[1:85],globtp_holt[1:85],globtp_arima[1:85],globtp_ME[1:85])
+> globtp_Op=globtp_holt*w_globtp[1,1]+globtp_arima*w_globtp[2,1]+globtp_ME*w_globtp[3,1]
+> 
+> w_HURON=Peso.function(HURON[1:79],HURON_holt[1:79],HURON_arima[1:79],HURON_ME[1:79])
+> HURON_Op=HURON_holt*w_HURON[1,1]+HURON_arima*w_HURON[2,1]+HURON_ME*w_HURON[3,1]
+> 
+> w_SHEEP=Peso.function(SHEEP[1:59],SHEEP_holt[1:59],SHEEP_arima[1:59],SHEEP_ME[1:59])
+> SHEEP_Op=SHEEP_holt*w_SHEEP[1,1]+SHEEP_arima*w_SHEEP[2,1]+SHEEP_ME*w_SHEEP[3,1]
+> 
+> w_summer=Peso.function(summer[1:84],summer_holt[1:84],summer_arima[1:84],summer_ME[1:84])
+> summer_Op=summer_holt*w_summer[1,1]+summer_arima*w_summer[2,1]+summer_ME*w_summer[3,1]
+> 
+> w_ausgundeaths=Peso.function(ausgundeaths[1:72],ausgundeaths_holt[1:72],ausgundeaths_arima[1:72],ausgundeaths_ME[1:72])
+> ausgundeaths_Op=ausgundeaths_holt*w_ausgundeaths[1,1]+ausgundeaths_arima*w_ausgundeaths[2,1]+ausgundeaths_ME*w_ausgundeaths[3,1]
+> 
+> w_Carga=Peso.function(Carga[1:73],Carga_holt[1:73],Carga_arima[1:73],Carga_ME[1:73])
+> Carga_Op=Carga_holt*w_Carga[1,1]+Carga_arima*w_Carga[2,1]+Carga_ME*w_Carga[3,1]
+> 
+> #Gráficos
+> graf(cow,cow_Op,"Previsão da Série Cow por Combinação: Optimal")
+> graf(buffsnow,buffsnow_Op,"Previsão da Série Buffsnow por Combinação: Optimal")
+> graf(calfem,calfem_Op,"Previsão da Série Calfem por Combinação: Optimal")
+> graf(DowJones,DowJones_Op,"Previsão da Série DowJones por Combinação: Optimal")
+> graf(globtp,globtp_Op,"Previsão da Série Globtp por Combinação: Optimal")
+> graf(HURON,HURON_Op,"Previsão da Série HURON por Combinação: Optimal")
+> graf(SHEEP,SHEEP_Op,"Previsão da Série SHEEP por Combinação: Optimal")
+> graf(summer,summer_Op,"Previsão da Série Summer por Combinação: Optimal")
+> graf(ausgundeaths,ausgundeaths_Op,"Previsão da Série Ausgundeaths por Combinação: Optimal")
+> graf(Carga,Carga_Op,"Previsão da Série Carga por Combinação: Optimal")
+> 
+> ########################## Optimal com independência ########################### 
+> w_cow=Peso.function(cow[1:60],cow_holt[1:60],cow_arima[1:60],cow_ME[1:60],Ind=TRUE)
+> cow_OpI=cow_holt*w_cow[1,1]+cow_arima*w_cow[2,1]+cow_ME*w_cow[3,1]
+> 
+> w_buffsnow=Peso.function(buffsnow[1:51],buffsnow_holt[1:51],buffsnow_arima[1:51],buffsnow_ME[1:51],Ind=TRUE)
+> buffsnow_OpI=buffsnow_holt*w_buffsnow[1,1]+buffsnow_arima*w_buffsnow[2,1]+buffsnow_ME*w_buffsnow[3,1]
+> 
+> w_calfem=Peso.function(calfem[1:96],calfem_holt[1:96],calfem_arima[1:96],calfem_ME[1:96],Ind=TRUE)
+> calfem_OpI=calfem_holt*w_calfem[1,1]+calfem_arima*w_calfem[2,1]+calfem_ME*w_calfem[3,1]
+> 
+> w_DowJones=Peso.function(DowJones[1:63],DowJones_holt[1:63],DowJones_arima[1:63],DowJones_ME[1:63],Ind=TRUE)
+> DowJones_OpI=DowJones_holt*w_DowJones[1,1]+DowJones_arima*w_DowJones[2,1]+DowJones_ME*w_DowJones[3,1]
+> 
+> w_globtp=Peso.function(globtp[1:85],globtp_holt[1:85],globtp_arima[1:85],globtp_ME[1:85],Ind=TRUE)
+> globtp_OpI=globtp_holt*w_globtp[1,1]+globtp_arima*w_globtp[2,1]+globtp_ME*w_globtp[3,1]
+> 
+> w_HURON=Peso.function(HURON[1:79],HURON_holt[1:79],HURON_arima[1:79],HURON_ME[1:79],Ind=TRUE)
+> HURON_OpI=HURON_holt*w_HURON[1,1]+HURON_arima*w_HURON[2,1]+HURON_ME*w_HURON[3,1]
+> 
+> w_SHEEP=Peso.function(SHEEP[1:59],SHEEP_holt[1:59],SHEEP_arima[1:59],SHEEP_ME[1:59],Ind=TRUE)
+> SHEEP_OpI=SHEEP_holt*w_SHEEP[1,1]+SHEEP_arima*w_SHEEP[2,1]+SHEEP_ME*w_SHEEP[3,1]
+> 
+> w_summer=Peso.function(summer[1:84],summer_holt[1:84],summer_arima[1:84],summer_ME[1:84],Ind=TRUE)
+> summer_OpI=summer_holt*w_summer[1,1]+summer_arima*w_summer[2,1]+summer_ME*w_summer[3,1]
+> 
+> w_ausgundeaths=Peso.function(ausgundeaths[1:72],ausgundeaths_holt[1:72],ausgundeaths_arima[1:72],ausgundeaths_ME[1:72],Ind=TRUE)
+> ausgundeaths_OpI=ausgundeaths_holt*w_ausgundeaths[1,1]+ausgundeaths_arima*w_ausgundeaths[2,1]+ausgundeaths_ME*w_ausgundeaths[3,1]
+> 
+> w_Carga=Peso.function(Carga[1:73],Carga_holt[1:73],Carga_arima[1:73],Carga_ME[1:73],Ind=TRUE)
+> Carga_OpI=Carga_holt*w_Carga[1,1]+Carga_arima*w_Carga[2,1]+Carga_ME*w_Carga[3,1]
+> 
+> #Gráficos
+> #par(ask=TRUE)
+> graf(cow,cow_OpI,"Previsão da Série Cow por Combinação: Optimal com Independência")
+> graf(buffsnow,buffsnow_OpI,"Previsão da Série Buffsnow por Combinação: Optimal com Independência")
+> graf(calfem,calfem_OpI,"Previsão da Série Calfem por Combinação: Optimal com Independência")
+> graf(DowJones,DowJones_OpI,"Previsão da Série DowJones por Combinação: Optimal com Independência")
+> graf(globtp,globtp_OpI,"Previsão da Série Globtp por Combinação: Optimal com Independência")
+> graf(HURON,HURON_OpI,"Previsão da Série HURON por Combinação: Optimal com Independência")
+> graf(SHEEP,SHEEP_OpI,"Previsão da Série SHEEP por Combinação: Optimal com Independência")
+> graf(summer,summer_OpI,"Previsão da Série Summer por Combinação: Optimal com Independência")
+> graf(ausgundeaths,ausgundeaths_OpI,"Previsão da Série Ausgundeaths por Combinação: Optimal com Independência")
+> graf(Carga,Carga_OpI,"Previsão da Série Carga por Combinação: Optimal com Independência")
+> 
+> ################################################################################   
+> ############################ Combinações Reestimadas ###########################
+> 
+> ################################## Regressão ###################################  
+> Reg_cow_r=lm(cow[1:60]~cow_holt[1:60]+cow_arima[1:60]+cow_ME[1:60])
+> cow_R_r=c()
+> cow_R_r[3:60]=Reg_cow_r$fitted.values
+> model_cow=matrix(Reg_cow_r$coefficients,1)
+> for (i in 61:75) {
++   Reg_cow_r=lm(cow[1:i]~cow_holt[1:i]+cow_arima[1:i]+cow_ME[1:i])
++   model_cow=rbind(model_cow,Reg_cow_r$coefficients)
++   cow_R_r[i]= Reg_cow_r$coefficients[1]+Reg_cow_r$coefficients[2]*cow_holt[i]+
++     Reg_cow_r$coefficients[3]*cow_arima[i]+Reg_cow_r$coefficients[4]*cow_ME[i]}
+> Reg_cow_r
+
+Call:
+lm(formula = cow[1:i] ~ cow_holt[1:i] + cow_arima[1:i] + cow_ME[1:i])
+
+Coefficients:
+   (Intercept)   cow_holt[1:i]  cow_arima[1:i]     cow_ME[1:i]  
+      -31.6017         -0.1647          1.9582         -0.2568  
+
+> 
+> Reg_buffsnow_r=lm(buffsnow[1:51]~buffsnow_holt[1:51]+buffsnow_arima[1:51]+buffsnow_ME[1:51])
+> buffsnow_R_r=c()
+> buffsnow_R_r[3:51]=Reg_buffsnow_r$fitted.values
+> model_buffsnow=matrix(Reg_buffsnow_r$coefficients,1)
+> for(i in 52:63){
++   Reg_buffsnow_r=lm(buffsnow[1:i]~buffsnow_holt[1:i]+buffsnow_arima[1:i]+buffsnow_ME[1:i])
++   model_buffsnow=rbind(model_buffsnow,Reg_buffsnow_r$coefficients)
++   buffsnow_R_r[i]=Reg_buffsnow_r$coefficients[1]+Reg_buffsnow_r$coefficients[2]*buffsnow_holt[i]+
++     Reg_buffsnow_r$coefficients[3]*buffsnow_arima[i]+Reg_buffsnow_r$coefficients[4]*buffsnow_ME[i]}
+> Reg_buffsnow_r
+
+Call:
+lm(formula = buffsnow[1:i] ~ buffsnow_holt[1:i] + buffsnow_arima[1:i] + 
+    buffsnow_ME[1:i])
+
+Coefficients:
+        (Intercept)   buffsnow_holt[1:i]  buffsnow_arima[1:i]     buffsnow_ME[1:i]  
+           -16.1857               0.3427               1.4100              -0.5499  
+
+> 
+> Reg_calfem_r=lm(calfem[1:96]~calfem_holt[1:96]+calfem_arima[1:96]+calfem_ME[1:96])
+> calfem_R_r=c()
+> calfem_R_r[3:96]=Reg_calfem_r$fitted.values
+> model_calfem=matrix(Reg_calfem_r$coefficients,1)
+> for(i in 97:120){       #Não tem a componente arima pois as previsões são uma constante.
++   Reg_calfem_r=lm(calfem[1:i]~calfem_holt[1:i]+calfem_arima[1:i]+calfem_ME[1:i])
++   model_calfem=rbind(model_calfem,Reg_calfem_r$coefficients)
++   calfem_R_r[i]=Reg_calfem_r$coefficients[1]+Reg_calfem_r$coefficients[2]*calfem_holt[i]
++   +Reg_calfem_r$coefficients[4]*calfem_ME[i]}
+> Reg_calfem_r
+
+Call:
+lm(formula = calfem[1:i] ~ calfem_holt[1:i] + calfem_arima[1:i] + 
+    calfem_ME[1:i])
+
+Coefficients:
+      (Intercept)   calfem_holt[1:i]  calfem_arima[1:i]     calfem_ME[1:i]  
+         37.32093            0.05239                 NA            0.01411  
+
+> 
+> Reg_DowJones_r=lm(DowJones[1:63]~DowJones_holt[1:63]+DowJones_arima[1:63]+DowJones_ME[1:63])
+> DowJones_R_r=c()
+> DowJones_R_r[3:63]=Reg_DowJones_r$fitted.values
+> model_DowJones=matrix(Reg_DowJones_r$coefficients,1)
+> for(i in 64:78){
++   Reg_DowJones_r=lm(DowJones[1:i]~DowJones_holt[1:i]+DowJones_arima[1:i]+DowJones_ME[1:i])
++   model_DowJones=rbind(model_DowJones,Reg_DowJones_r$coefficients)
++   DowJones_R_r[i]=Reg_DowJones_r$coefficients[1]+Reg_DowJones_r$coefficients[2]*DowJones_holt[i]+
++     Reg_DowJones_r$coefficients[3]*DowJones_arima[i]+Reg_DowJones_r$coefficients[4]*DowJones_ME[i]}
+> Reg_DowJones_r
+
+Call:
+lm(formula = DowJones[1:i] ~ DowJones_holt[1:i] + DowJones_arima[1:i] + 
+    DowJones_ME[1:i])
+
+Coefficients:
+        (Intercept)   DowJones_holt[1:i]  DowJones_arima[1:i]     DowJones_ME[1:i]  
+             1.7213               0.5491               0.2510               0.1850  
+
+> 
+> Reg_globtp_r=lm(globtp[1:85]~globtp_holt[1:85]+globtp_arima[1:85]+globtp_ME[1:85])
+> globtp_R_r=c()
+> globtp_R_r[3:85]=Reg_globtp_r$fitted.values
+> model_globtp=matrix(Reg_globtp_r$coefficients,1)
+> for(i in 86:106){
++   Reg_globtp_r=lm(globtp[1:i]~globtp_holt[1:i]+globtp_arima[1:i]+globtp_ME[1:i])
++   model_globtp=rbind(model_globtp,Reg_globtp_r$coefficients)
++   globtp_R_r[i]=Reg_globtp_r$coefficients[1]+Reg_globtp_r$coefficients[2]*globtp_holt[i]+
++     Reg_globtp_r$coefficients[3]*globtp_arima[i]+Reg_globtp_r$coefficients[4]*globtp_ME[i]}
+> Reg_globtp_r
+
+Call:
+lm(formula = globtp[1:i] ~ globtp_holt[1:i] + globtp_arima[1:i] + 
+    globtp_ME[1:i])
+
+Coefficients:
+      (Intercept)   globtp_holt[1:i]  globtp_arima[1:i]     globtp_ME[1:i]  
+         -0.01082            0.09330            0.89002           -0.05510  
+
+> 
+> Reg_HURON_r=lm(HURON[1:79]~HURON_holt[1:79]+HURON_arima[1:79]+HURON_ME[1:79])
+> HURON_R_r=c()
+> HURON_R_r[3:79]=Reg_HURON_r$fitted.values
+> model_HURON=matrix(Reg_HURON_r$coefficients,1)
+> for(i in 80:98){
++   Reg_HURON_r=lm(HURON[1:i]~HURON_holt[1:i]+HURON_arima[1:i]+HURON_ME[1:i])
++   model_HURON=rbind(model_HURON,Reg_HURON_r$coefficients)
++   HURON_R_r[i]=Reg_HURON_r$coefficients[1]+Reg_HURON_r$coefficients[2]*HURON_holt[i]+
++     Reg_HURON_r$coefficients[3]*HURON_arima[i]+Reg_HURON_r$coefficients[4]*HURON_ME[i]}
+> Reg_HURON_r
+
+Call:
+lm(formula = HURON[1:i] ~ HURON_holt[1:i] + HURON_arima[1:i] + 
+    HURON_ME[1:i])
+
+Coefficients:
+     (Intercept)   HURON_holt[1:i]  HURON_arima[1:i]     HURON_ME[1:i]  
+        -0.20305          -0.18661           1.11331           0.08874  
+
+> 
+> Reg_SHEEP_r=lm(SHEEP[1:59]~SHEEP_holt[1:59]+SHEEP_arima[1:59]+SHEEP_ME[1:59])
+> SHEEP_R_r=c()
+> SHEEP_R_r[3:59]=Reg_SHEEP_r$fitted.values
+> model_SHEEP=matrix(Reg_SHEEP_r$coefficients,1)
+> for(i in 60:73){
++   Reg_SHEEP_r=lm(SHEEP[1:i]~SHEEP_holt[1:i]+SHEEP_arima[1:i]+SHEEP_ME[1:i])
++   model_SHEEP=rbind(model_SHEEP,Reg_SHEEP_r$coefficients)
++   SHEEP_R_r[i]=Reg_SHEEP_r$coefficients[1]+Reg_SHEEP_r$coefficients[2]*SHEEP_holt[i]+
++     Reg_SHEEP_r$coefficients[3]*SHEEP_arima[i]+Reg_SHEEP_r$coefficients[4]*SHEEP_ME[i]}
+> Reg_SHEEP_r
+
+Call:
+lm(formula = SHEEP[1:i] ~ SHEEP_holt[1:i] + SHEEP_arima[1:i] + 
+    SHEEP_ME[1:i])
+
+Coefficients:
+     (Intercept)   SHEEP_holt[1:i]  SHEEP_arima[1:i]     SHEEP_ME[1:i]  
+        141.9355            0.7286            0.8436           -0.6469  
+
+> 
+> Reg_summer_r=lm(summer[1:84]~summer_holt[1:84]+summer_arima[1:84]+summer_ME[1:84])
+> summer_R_r=c()
+> summer_R_r[3:84]=Reg_summer_r$fitted.values
+> model_summer=matrix(Reg_summer_r$coefficients,1)
+> for(i in 85:104){
++   Reg_summer_r=lm(summer[1:i]~summer_holt[1:i]+summer_arima[1:i]+summer_ME[1:i])
++   model_summer=rbind(model_summer,Reg_summer_r$coefficients)
++   summer_R_r[i]=Reg_summer_r$coefficients[1]+Reg_summer_r$coefficients[2]*summer_holt[i]+
++     Reg_summer_r$coefficients[3]*summer_arima[i]+Reg_summer_r$coefficients[4]*summer_ME[i]}
+> Reg_summer_r
+
+Call:
+lm(formula = summer[1:i] ~ summer_holt[1:i] + summer_arima[1:i] + 
+    summer_ME[1:i])
+
+Coefficients:
+      (Intercept)   summer_holt[1:i]  summer_arima[1:i]     summer_ME[1:i]  
+           1.5985            -0.6149             1.2029             0.2972  
+
+> 
+> Reg_ausgundeaths_r=lm(ausgundeaths[1:72]~ausgundeaths_holt[1:72]+ausgundeaths_arima[1:72]+ausgundeaths_ME[1:72])
+> ausgundeaths_R_r=c()
+> ausgundeaths_R_r[3:72]=Reg_ausgundeaths_r$fitted.values
+> model_ausgundeaths=matrix(Reg_ausgundeaths_r$coefficients,1)
+> for(i in 73:90){
++   Reg_ausgundeaths_r=lm(ausgundeaths[1:i]~ausgundeaths_holt[1:i]+ausgundeaths_arima[1:i]+ausgundeaths_ME[1:i])
++   model_ausgundeaths=rbind(model_ausgundeaths,Reg_ausgundeaths_r$coefficients)
++   ausgundeaths_R_r[i]=Reg_ausgundeaths_r$coefficients[1]+Reg_ausgundeaths_r$coefficients[2]*ausgundeaths_holt[i]+
++     Reg_ausgundeaths_r$coefficients[3]*ausgundeaths_arima[i]+Reg_ausgundeaths_r$coefficients[4]*ausgundeaths_ME[i]}
+> Reg_ausgundeaths_r
+
+Call:
+lm(formula = ausgundeaths[1:i] ~ ausgundeaths_holt[1:i] + ausgundeaths_arima[1:i] + 
+    ausgundeaths_ME[1:i])
+
+Coefficients:
+            (Intercept)   ausgundeaths_holt[1:i]  ausgundeaths_arima[1:i]     ausgundeaths_ME[1:i]  
+                0.86001                  0.47773                  0.46830                 -0.04147  
+
+> 
+> Reg_Carga_r=lm(Carga[1:73]~Carga_holt[1:73]+Carga_arima[1:73]+Carga_ME[1:73])
+> Carga_R_r=c()
+> Carga_R_r[3:73]=Reg_Carga_r$fitted.values
+> model_Carga=matrix(Reg_Carga_r$coefficients,1)
+> for(i in 74:91){
++   Reg_Carga_r=lm(Carga[1:i]~Carga_holt[1:i]+Carga_arima[1:i]+Carga_ME[1:i])
++   model_Carga=rbind(model_Carga,Reg_Carga_r$coefficients)
++   Carga_R_r[i]=Reg_Carga_r$coefficients[1]+Reg_Carga_r$coefficients[2]*Carga_holt[i]+
++     Reg_Carga_r$coefficients[3]*Carga_arima[i]+Reg_Carga_r$coefficients[4]*Carga_ME[i]}
+> Reg_Carga_r
+
+Call:
+lm(formula = Carga[1:i] ~ Carga_holt[1:i] + Carga_arima[1:i] + 
+    Carga_ME[1:i])
+
+Coefficients:
+     (Intercept)   Carga_holt[1:i]  Carga_arima[1:i]     Carga_ME[1:i]  
+          9.6779            0.8622            0.1628           -0.2092  
+
+> 
+> #Gráficos
+> graf(cow,cow_R_r,"Previsão da série Cow por Combinação: Regressão_Reestimando")
+> graf(buffsnow,buffsnow_R_r,"Previsão da série Buffsnow por Combinação: Regressão_Reestimando")
+> graf(calfem,calfem_R_r,"Previsão da série Calfem por Combinação: Regressão_Reestimando")
+> graf(DowJones,DowJones_R_r,"Previsão da série DowJones por Combinação: Regressão_Reestimando")
+> graf(globtp,globtp_R_r,"Previsão da série Globtp por Combinação: Regressão_Reestimando")
+> graf(HURON,HURON_R_r,"Previsão da série HURON por Combinação: Regressão_Reestimando")
+> graf(SHEEP,SHEEP_R_r,"Previsão da série SHEEP por Combinação: Regressão_Reestimando")
+> graf(summer,summer_R_r,"Previsão da série Summer por Combinação: Regressão_Reestimando")
+> graf(ausgundeaths,ausgundeaths_R_r,"Previsão da série Ausgundeaths por Combinação: Regressão_Reestimando")
+> graf(Carga,Carga_R_r,"Previsão da série Carga por Combinação: Regressão_Reestimando")
+> 
+> graf2(model_cow)
+> graf2(model_buffsnow)
+> #graf2(model_calfem)
+> graf2(model_DowJones)
+> graf2(model_globtp)
+> graf2(model_HURON)
+> graf2(model_SHEEP)
+> graf2(model_summer)
+> graf2(model_ausgundeaths)
+> graf2(model_Carga)
+> 
+> #################################### Optimal ###################################     
+> w_cow_r=Peso.function(cow[1:60],cow_holt[1:60],cow_arima[1:60],cow_ME[1:60])
+> cow_Op_r=c()
+> cow_Op_r=cow_holt[1:60]*w_cow_r[1,1]+cow_arima[1:60]*w_cow_r[2,1]+cow_ME[1:60]*w_cow_r[3,1]
+> peso_cow_r=w_cow_r
+> for(i in 61:75){
++   w_cow_r=Peso.function(cow[1:i],cow_holt[1:i],cow_arima[1:i],cow_ME[1:i])
++   peso_cow_r=cbind(peso_cow_r,w_cow_r)
++   cow_Op_r[i]=cow_holt[i]*w_cow_r[1,1]+cow_arima[i]*w_cow_r[2,1]+cow_ME[i]*w_cow_r[3,1]
++ }
+> 
+> w_buffsnow_r=Peso.function(buffsnow[1:51],buffsnow_holt[1:51],buffsnow_arima[1:51],buffsnow_ME[1:51])
+> buffsnow_Op_r=c()
+> buffsnow_Op_r=buffsnow_holt[1:51]*w_buffsnow_r[1,1]+buffsnow_arima[1:51]*w_buffsnow_r[2,1]+buffsnow_ME[1:51]*w_buffsnow_r[3,1]
+> peso_buffsnow_r=w_buffsnow_r
+> for(i in 52:63){
++   w_buffsnow_r=Peso.function(buffsnow[1:i],buffsnow_holt[1:i],buffsnow_arima[1:i],buffsnow_ME[1:i])
++   peso_buffsnow_r=cbind(peso_buffsnow_r,w_buffsnow_r)
++   buffsnow_Op_r[i]=buffsnow_holt[i]*w_buffsnow_r[1,1]+buffsnow_arima[i]*w_buffsnow_r[2,1]+buffsnow_ME[i]*w_buffsnow_r[3,1]
++ }
+> 
+> w_calfem_r=Peso.function(calfem[1:96],calfem_holt[1:96],calfem_arima[1:96],calfem_ME[1:96])
+> calfem_Op_r=c()
+> calfem_Op_r=calfem_holt[1:96]*w_calfem_r[1,1]+calfem_arima[1:96]*w_calfem_r[2,1]+calfem_ME[1:96]*w_calfem_r[3,1]
+> peso_calfem_r=w_calfem_r
+> for(i in 97:120){  
++   w_calfem_r=Peso.function(calfem[1:i],calfem_holt[1:i],calfem_arima[1:i],calfem_ME[1:i])
++   peso_calfem_r=cbind(peso_calfem_r,w_calfem_r)
++   calfem_Op_r[i]=calfem_holt[i]*w_calfem_r[1,1]+calfem_arima[i]*w_calfem_r[2,1]+calfem_ME[i]*w_calfem_r[3,1]
++ }
+> 
+> w_DowJones_r=Peso.function(DowJones[1:63],DowJones_holt[1:63],DowJones_arima[1:63],DowJones_ME[1:63])
+> DowJones_Op_r=c()
+> DowJones_Op_r=DowJones_holt[1:63]*w_DowJones_r[1,1]+DowJones_arima[1:63]*w_DowJones_r[2,1]+DowJones_ME[1:63]*w_DowJones_r[3,1]
+> peso_DowJones_r=w_DowJones_r
+> for(i in 64:78){
++   w_DowJones_r=Peso.function(DowJones[1:i],DowJones_holt[1:i],DowJones_arima[1:i],DowJones_ME[1:i])
++   peso_DowJones_r=cbind(peso_DowJones_r,w_DowJones_r)
++   DowJones_Op_r[i]=DowJones_holt[i]*w_DowJones_r[1,1]+DowJones_arima[i]*w_DowJones_r[2,1]+DowJones_ME[i]*w_DowJones_r[3,1]
++ }
+> 
+> w_globtp_r=Peso.function(globtp[1:85],globtp_holt[1:85],globtp_arima[1:85],globtp_ME[1:85])
+> globtp_Op_r=c()
+> globtp_Op_r=globtp_holt[1:85]*w_globtp_r[1,1]+globtp_arima[1:85]*w_globtp_r[2,1]+globtp_ME[1:85]*w_globtp_r[3,1]
+> peso_globtp_r=w_globtp_r
+> for(i in 86:106){
++   w_globtp_r=Peso.function(globtp[1:i],globtp_holt[1:i],globtp_arima[1:i],globtp_ME[1:i])
++   peso_globtp_r=cbind(peso_globtp_r,w_globtp_r)
++   globtp_Op_r[i]=globtp_holt[i]*w_globtp_r[1,1]+globtp_arima[i]*w_globtp_r[2,1]+globtp_ME[i]*w_globtp_r[3,1]
++ }
+> 
+> w_HURON_r=Peso.function(HURON[1:79],HURON_holt[1:79],HURON_arima[1:79],HURON_ME[1:79])
+> HURON_Op_r=c()
+> HURON_Op_r=HURON_holt[1:79]*w_HURON_r[1,1]+HURON_arima[1:79]*w_HURON_r[2,1]+HURON_ME[1:79]*w_HURON_r[3,1]
+> peso_HURON_r=w_HURON_r
+> for (i in 80:98){
++   w_HURON_r=Peso.function(HURON[1:i],HURON_holt[1:i],HURON_arima[1:i],HURON_ME[1:i])
++   peso_HURON_r=cbind(peso_HURON_r,w_HURON_r)
++   HURON_Op_r[i]=HURON_holt[i]*w_HURON_r[1,1]+HURON_arima[i]*w_HURON_r[2,1]+HURON_ME[i]*w_HURON_r[3,1]
++ }
+> 
+> w_SHEEP_r=Peso.function(SHEEP[1:59],SHEEP_holt[1:59],SHEEP_arima[1:59],SHEEP_ME[1:59])
+> SHEEP_Op_r=c()
+> SHEEP_Op_r=SHEEP_holt[1:59]*w_SHEEP_r[1,1]+SHEEP_arima[1:59]*w_SHEEP_r[2,1]+SHEEP_ME[1:59]*w_SHEEP_r[3,1]
+> peso_SHEEP_r=w_SHEEP_r
+> for (i in 60:73){
++   w_SHEEP_r=Peso.function(SHEEP[1:i],SHEEP_holt[1:i],SHEEP_arima[1:i],SHEEP_ME[1:i])
++   peso_SHEEP_r=cbind(peso_SHEEP_r,w_SHEEP_r)
++   SHEEP_Op_r[i]=SHEEP_holt[i]*w_SHEEP_r[1,1]+SHEEP_arima[i]*w_SHEEP_r[2,1]+SHEEP_ME[i]*w_SHEEP_r[3,1]
++ }
+> 
+> w_summer_r=Peso.function(summer[1:84],summer_holt[1:84],summer_arima[1:84],summer_ME[1:84])
+> summer_Op_r=c()
+> summer_Op_r=summer_holt[1:84]*w_summer_r[1,1]+summer_arima[1:84]*w_summer_r[2,1]+summer_ME[1:84]*w_summer_r[3,1]
+> peso_summer_r=w_summer_r
+> for(i in 85:104){
++   w_summer_r=Peso.function(summer[1:i],summer_holt[1:i],summer_arima[1:i],summer_ME[1:i])
++   peso_summer_r=cbind(peso_summer_r,w_summer_r)
++   summer_Op_r[i]=summer_holt[i]*w_summer_r[1,1]+summer_arima[i]*w_summer_r[2,1]+summer_ME[i]*w_summer_r[3,1]
++ }
+> 
+> w_ausgundeaths_r=Peso.function(ausgundeaths[1:72],ausgundeaths_holt[1:72],ausgundeaths_arima[1:72],ausgundeaths_ME[1:72])
+> ausgundeaths_Op_r=c()
+> ausgundeaths_Op_r=ausgundeaths_holt[1:72]*w_ausgundeaths_r[1,1]+ausgundeaths_arima[1:72]*w_ausgundeaths_r[2,1]+ausgundeaths_ME[1:72]*w_ausgundeaths_r[3,1]
+> peso_ausgundeaths_r=w_ausgundeaths_r
+> for (i in 73:90){
++   w_ausgundeaths_r=Peso.function(ausgundeaths[1:i],ausgundeaths_holt[1:i],ausgundeaths_arima[1:i],ausgundeaths_ME[1:i])
++   peso_ausgundeaths_r=cbind(peso_ausgundeaths_r,w_ausgundeaths_r)
++   ausgundeaths_Op_r[i]=ausgundeaths_holt[i]*w_ausgundeaths_r[1,1]+ausgundeaths_arima[i]*w_ausgundeaths_r[2,1]+ausgundeaths_ME[i]*w_ausgundeaths_r[3,1]
++ }
+> 
+> w_Carga_r=Peso.function(Carga[1:73],Carga_holt[1:73],Carga_arima[1:73],Carga_ME[1:73])
+> Carga_Op_r=c()
+> Carga_Op_r=Carga_holt[1:73]*w_Carga_r[1,1]+Carga_arima[1:73]*w_Carga_r[2,1]+Carga_ME[1:73]*w_Carga_r[3,1]
+> peso_Carga_r=w_Carga_r
+> for(i in 74:91){
++   w_Carga_r=Peso.function(Carga[1:i],Carga_holt[1:i],Carga_arima[1:i],Carga_ME[1:i])
++   peso_Carga_r=cbind(peso_Carga_r,w_Carga_r)
++   Carga_Op_r[i]=Carga_holt[i]*w_Carga_r[1,1]+Carga_arima[i]*w_Carga_r[2,1]+Carga_ME[i]*w_Carga_r[3,1]
++ }
+> 
+> #Gráficos
+> graf(cow,cow_Op_r,"Previsão da série Cow por Combinação: Optimal_Reestimando")
+> graf(buffsnow,buffsnow_Op_r,"Previsão da série Buffsnow por Combinação: Optimal_Reestimando")
+> graf(calfem,calfem_Op_r,"Previsão da série Calfem por Combinação: Optimal_Reestimando")
+> graf(DowJones,DowJones_Op_r,"Previsão da série DowJones por Combinação: Optimal_Reestimando")
+> graf(globtp,globtp_Op_r,"Previsão da série Globtp por Combinação: Optimal_Reestimando")
+> graf(HURON,HURON_Op_r,"Previsão da série HURON por Combinação: Optimal_Reestimando")
+> graf(SHEEP,SHEEP_Op_r,"Previsão da série SHEEP por Combinação: Optimal_Reestimando")
+> graf(summer,summer_Op_r,"Previsão da série Summer por Combinação: Optimal_Reestimando")
+> graf(ausgundeaths,ausgundeaths_Op_r,"Previsão da série Ausgundeaths por Combinação: Optimal_Reestimando")
+> graf(Carga,Carga_Op_r,"Previsão da série Carga por Combinação: Optimal_Reestimando")
+> 
+> graf3(peso_cow_r)
+> graf3(peso_buffsnow_r)
+> graf3(peso_calfem_r)
+> graf3(peso_DowJones_r)
+> graf3(peso_globtp_r)
+> graf3(peso_HURON_r)
+> graf3(peso_SHEEP_r)
+> graf3(peso_summer_r)
+> graf3(peso_ausgundeaths_r)
+> graf3(peso_Carga_r)
+> 
+> ########################### Optimal com independência ##########################
+> w_cow_r=Peso.function(cow[1:60],cow_holt[1:60],cow_arima[1:60],cow_ME[1:60],Ind=TRUE)
+> cow_OpI_r=c()
+> cow_OpI_r=cow_holt[1:60]*w_cow_r[1,1]+cow_arima[1:60]*w_cow_r[2,1]+cow_ME[1:60]*w_cow_r[3,1]
+> peso_cow_r=w_cow_r
+> for(i in 61:75){
++   w_cow_r=Peso.function(cow[1:i],cow_holt[1:i],cow_arima[1:i],cow_ME[1:i],Ind=TRUE)
++   peso_cow_r=cbind(peso_cow_r,w_cow_r)
++   cow_OpI_r[i]=cow_holt[i]*w_cow_r[1,1]+cow_arima[i]*w_cow_r[2,1]+cow_ME[i]*w_cow_r[3,1]
++ }
+> 
+> w_buffsnow_r=Peso.function(buffsnow[1:51],buffsnow_holt[1:51],buffsnow_arima[1:51],buffsnow_ME[1:51],Ind=TRUE)
+> buffsnow_OpI_r=c()
+> buffsnow_OpI_r=buffsnow_holt[1:51]*w_buffsnow_r[1,1]+buffsnow_arima[1:51]*w_buffsnow_r[2,1]+buffsnow_ME[1:51]*w_buffsnow_r[3,1]
+> peso_buffsnow_r=w_buffsnow_r
+> for(i in 52:63){
++   w_buffsnow_r=Peso.function(buffsnow[1:i],buffsnow_holt[1:i],buffsnow_arima[1:i],buffsnow_ME[1:i],Ind=TRUE)
++   peso_buffsnow_r=cbind(peso_buffsnow_r,w_buffsnow_r)
++   buffsnow_OpI_r[i]=buffsnow_holt[i]*w_buffsnow_r[1,1]+buffsnow_arima[i]*w_buffsnow_r[2,1]+buffsnow_ME[i]*w_buffsnow_r[3,1]
++ }
+> 
+> w_calfem_r=Peso.function(calfem[1:96],calfem_holt[1:96],calfem_arima[1:96],calfem_ME[1:96],Ind=TRUE)
+> calfem_OpI_r=c()
+> calfem_OpI_r=calfem_holt[1:96]*w_calfem_r[1,1]+calfem_arima[1:96]*w_calfem_r[2,1]+calfem_ME[1:96]*w_calfem_r[3,1]
+> peso_calfem_r=w_calfem_r
+> for(i in 97:120){  
++   w_calfem_r=Peso.function(calfem[1:i],calfem_holt[1:i],calfem_arima[1:i],calfem_ME[1:i],Ind=TRUE)
++   peso_calfem_r=cbind(peso_calfem_r,w_calfem_r)
++   calfem_OpI_r[i]=calfem_holt[i]*w_calfem_r[1,1]+calfem_arima[i]*w_calfem_r[2,1]+calfem_ME[i]*w_calfem_r[3,1]
++ }
+> 
+> w_DowJones_r=Peso.function(DowJones[1:63],DowJones_holt[1:63],DowJones_arima[1:63],DowJones_ME[1:63],Ind=TRUE)
+> DowJones_OpI_r=c()
+> DowJones_OpI_r=DowJones_holt[1:63]*w_DowJones_r[1,1]+DowJones_arima[1:63]*w_DowJones_r[2,1]+DowJones_ME[1:63]*w_DowJones_r[3,1]
+> peso_DowJones_r=w_DowJones_r
+> for(i in 64:78){
++   w_DowJones_r=Peso.function(DowJones[1:i],DowJones_holt[1:i],DowJones_arima[1:i],DowJones_ME[1:i],Ind=TRUE)
++   peso_DowJones_r=cbind(peso_DowJones_r,w_DowJones_r)
++   DowJones_OpI_r[i]=DowJones_holt[i]*w_DowJones_r[1,1]+DowJones_arima[i]*w_DowJones_r[2,1]+DowJones_ME[i]*w_DowJones_r[3,1]
++ }
+> 
+> w_globtp_r=Peso.function(globtp[1:85],globtp_holt[1:85],globtp_arima[1:85],globtp_ME[1:85],Ind=TRUE)
+> globtp_OpI_r=c()
+> globtp_OpI_r=globtp_holt[1:85]*w_globtp_r[1,1]+globtp_arima[1:85]*w_globtp_r[2,1]+globtp_ME[1:85]*w_globtp_r[3,1]
+> peso_globtp_r=w_globtp_r
+> for(i in 86:106){
++   w_globtp_r=Peso.function(globtp[1:i],globtp_holt[1:i],globtp_arima[1:i],globtp_ME[1:i],Ind=TRUE)
++   peso_globtp_r=cbind(peso_globtp_r,w_globtp_r)
++   globtp_OpI_r[i]=globtp_holt[i]*w_globtp_r[1,1]+globtp_arima[i]*w_globtp_r[2,1]+globtp_ME[i]*w_globtp_r[3,1]
++ }
+> 
+> w_HURON_r=Peso.function(HURON[1:79],HURON_holt[1:79],HURON_arima[1:79],HURON_ME[1:79],Ind=TRUE)
+> HURON_OpI_r=c()
+> HURON_OpI_r=HURON_holt[1:79]*w_HURON_r[1,1]+HURON_arima[1:79]*w_HURON_r[2,1]+HURON_ME[1:79]*w_HURON_r[3,1]
+> peso_HURON_r=w_HURON_r
+> for (i in 80:98){
++   w_HURON_r=Peso.function(HURON[1:i],HURON_holt[1:i],HURON_arima[1:i],HURON_ME[1:i],Ind=TRUE)
++   peso_HURON_r=cbind(peso_HURON_r,w_HURON_r)
++   HURON_OpI_r[i]=HURON_holt[i]*w_HURON_r[1,1]+HURON_arima[i]*w_HURON_r[2,1]+HURON_ME[i]*w_HURON_r[3,1]
++ }
+> 
+> w_SHEEP_r=Peso.function(SHEEP[1:59],SHEEP_holt[1:59],SHEEP_arima[1:59],SHEEP_ME[1:59],Ind=TRUE)
+> SHEEP_OpI_r=c()
+> SHEEP_OpI_r=SHEEP_holt[1:59]*w_SHEEP_r[1,1]+SHEEP_arima[1:59]*w_SHEEP_r[2,1]+SHEEP_ME[1:59]*w_SHEEP_r[3,1]
+> peso_SHEEP_r=w_SHEEP_r
+> for (i in 60:73){
++   w_SHEEP_r=Peso.function(SHEEP[1:i],SHEEP_holt[1:i],SHEEP_arima[1:i],SHEEP_ME[1:i],Ind=TRUE)
++   peso_SHEEP_r=cbind(peso_SHEEP_r,w_SHEEP_r)
++   SHEEP_OpI_r[i]=SHEEP_holt[i]*w_SHEEP_r[1,1]+SHEEP_arima[i]*w_SHEEP_r[2,1]+SHEEP_ME[i]*w_SHEEP_r[3,1]
++ }
+> 
+> w_summer_r=Peso.function(summer[1:84],summer_holt[1:84],summer_arima[1:84],summer_ME[1:84],Ind=TRUE)
+> summer_OpI_r=c()
+> summer_OpI_r=summer_holt[1:84]*w_summer_r[1,1]+summer_arima[1:84]*w_summer_r[2,1]+summer_ME[1:84]*w_summer_r[3,1]
+> peso_summer_r=w_summer_r
+> for(i in 85:104){
++   w_summer_r=Peso.function(summer[1:i],summer_holt[1:i],summer_arima[1:i],summer_ME[1:i],Ind=TRUE)
++   peso_summer_r=cbind(peso_summer_r,w_summer_r)
++   summer_OpI_r[i]=summer_holt[i]*w_summer_r[1,1]+summer_arima[i]*w_summer_r[2,1]+summer_ME[i]*w_summer_r[3,1]
++ }
+> 
+> w_ausgundeaths_r=Peso.function(ausgundeaths[1:72],ausgundeaths_holt[1:72],ausgundeaths_arima[1:72],ausgundeaths_ME[1:72],Ind=TRUE)
+> ausgundeaths_OpI_r=c()
+> ausgundeaths_OpI_r=ausgundeaths_holt[1:72]*w_ausgundeaths_r[1,1]+ausgundeaths_arima[1:72]*w_ausgundeaths_r[2,1]+ausgundeaths_ME[1:72]*w_ausgundeaths_r[3,1]
+> peso_ausgundeaths_r=w_ausgundeaths_r
+> for (i in 73:90){
++   w_ausgundeaths_r=Peso.function(ausgundeaths[1:i],ausgundeaths_holt[1:i],ausgundeaths_arima[1:i],ausgundeaths_ME[1:i],Ind=TRUE)
++   peso_ausgundeaths_r=cbind(peso_ausgundeaths_r,w_ausgundeaths_r)
++   ausgundeaths_OpI_r[i]=ausgundeaths_holt[i]*w_ausgundeaths_r[1,1]+ausgundeaths_arima[i]*w_ausgundeaths_r[2,1]+ausgundeaths_ME[i]*w_ausgundeaths_r[3,1]
++ }
+> 
+> w_Carga_r=Peso.function(Carga[1:73],Carga_holt[1:73],Carga_arima[1:73],Carga_ME[1:73],Ind=TRUE)
+> Carga_OpI_r=c()
+> Carga_OpI_r=Carga_holt[1:73]*w_Carga_r[1,1]+Carga_arima[1:73]*w_Carga_r[2,1]+Carga_ME[1:73]*w_Carga_r[3,1]
+> peso_Carga_r=w_Carga_r
+> for(i in 74:91){
++   w_Carga_r=Peso.function(Carga[1:i],Carga_holt[1:i],Carga_arima[1:i],Carga_ME[1:i],Ind=TRUE)
++   peso_Carga_r=cbind(peso_Carga_r,w_Carga_r)
++   Carga_OpI_r[i]=Carga_holt[i]*w_Carga_r[1,1]+Carga_arima[i]*w_Carga_r[2,1]+Carga_ME[i]*w_Carga_r[3,1]
++ }
+> 
+> #Gráficos
+> graf(cow,cow_OpI_r,"Previsão da série Cow por Combinação: Optimal_Ind_Reestimando")
+> graf(buffsnow,buffsnow_OpI_r,"Previsão da série Buffsnow por Combinação: Optimal_Ind_Reestimando")
+> graf(calfem,calfem_OpI_r,"Previsão da série Calfem por Combinação: Optimal_Ind_Reestimando")
+> graf(DowJones,DowJones_OpI_r,"Previsão da série DowJones por Combinação: Optimal_Ind_Reestimando")
+> graf(globtp,globtp_OpI_r,"Previsão da série Globtp por Combinação: Optimal_Ind_Reestimando")
+> graf(HURON,HURON_OpI_r,"Previsão da série HURON por Combinação: Optimal_Ind_Reestimando")
+> graf(SHEEP,SHEEP_OpI_r,"Previsão da série SHEEP por Combinação: Optimal_Ind_Reestimando")
+> graf(summer,summer_OpI_r,"Previsão da série Summer por Combinação: Optimal_Ind_Reestimando")
+> graf(ausgundeaths,ausgundeaths_OpI_r,"Previsão da série Ausgundeaths por Combinação: Optimal_Ind_Reestimando")
+> graf(Carga,Carga_OpI_r,"Previsão da série Carga por Combinação: Optimal_Ind_Reestimando")
+> 
+> graf3(peso_cow_r)
+> graf3(peso_buffsnow_r)
+> graf3(peso_calfem_r)
+> graf3(peso_DowJones_r)
+> graf3(peso_globtp_r)
+> graf3(peso_HURON_r)
+> graf3(peso_SHEEP_r)
+> graf3(peso_summer_r)
+> graf3(peso_ausgundeaths_r)
+> graf3(peso_Carga_r)
+> 
+> ################################################################################   
+> ############################# Comparação De Modelos ############################
+> #Tabela de MSE
+> Tab_Erros = matrix(
++   c(
++     erros(cow,c(61,75),cow_holt)[2],
++     erros(cow,c(61,75),cow_arima)[2],
++     erros(cow,c(61,75),cow_ME)[2],
++     erros(cow,c(61,75),cow_MS)[2],
++     erros(cow,c(61,75),cow_Med)[2],
++     erros(cow,c(61,75),cow_MEx)[2],
++     erros(cow,c(61,75),cow_R)[2],
++     erros(cow,c(61,75),cow_R_r)[2],
++     erros(cow,c(61,75),cow_Op)[2],
++     erros(cow,c(61,75),cow_Op_r)[2],
++     erros(cow,c(61,75),cow_OpI)[2],
++    erros(cow,c(61,75),cow_OpI_r)[2],
++    
++    erros(buffsnow,c(52,63),buffsnow_holt)[2],
++    erros(buffsnow,c(52,63),buffsnow_arima)[2],
++    erros(buffsnow,c(52,63),buffsnow_ME)[2],
++    erros(buffsnow,c(52,63),buffsnow_MS)[2],
++    erros(buffsnow,c(52,63),buffsnow_Med)[2],
++    erros(buffsnow,c(52,63),buffsnow_MEx)[2],
++    erros(buffsnow,c(52,63),buffsnow_R)[2],
++    erros(buffsnow,c(52,63),buffsnow_R_r)[2],
++    erros(buffsnow,c(52,63),buffsnow_Op)[2],
++    erros(buffsnow,c(52,63),buffsnow_Op_r)[2],
++    erros(buffsnow,c(52,63),buffsnow_OpI)[2],
++    erros(buffsnow,c(52,63),buffsnow_OpI_r)[2],
++ 
++    erros(calfem,c(97,120),calfem_holt)[2],
++    erros(calfem,c(97,120),calfem_arima)[2],
++    erros(calfem,c(97,120),calfem_ME)[2],
++    erros(calfem,c(97,120),calfem_MS)[2],
++    erros(calfem,c(97,120),calfem_Med)[2],
++    erros(calfem,c(97,120),calfem_MEx)[2],
++    erros(calfem,c(97,120),calfem_R)[2],
++    erros(calfem,c(97,120),calfem_R_r)[2],
++    erros(calfem,c(97,120),calfem_Op)[2],
++    erros(calfem,c(97,120),calfem_Op_r)[2],
++    erros(calfem,c(97,120),calfem_OpI)[2],
++    erros(calfem,c(97,120),calfem_OpI_r)[2],
++    
++    
++   erros(DowJones,c(64,78),DowJones_holt)[2],
++   erros(DowJones,c(64,78),DowJones_arima)[2],
++   erros(DowJones,c(64,78),DowJones_ME)[2],
++   erros(DowJones,c(64,78),DowJones_MS)[2],
++   erros(DowJones,c(64,78),DowJones_Med)[2],
++   erros(DowJones,c(64,78),DowJones_MEx)[2],
++   erros(DowJones,c(64,78),DowJones_R)[2],
++   erros(DowJones,c(64,78),DowJones_R_r)[2],
++   erros(DowJones,c(64,78),DowJones_Op)[2],
++   erros(DowJones,c(64,78),DowJones_Op_r)[2],
++   erros(DowJones,c(64,78),DowJones_OpI)[2],
++   erros(DowJones,c(64,78),DowJones_OpI_r)[2],
++   
++   erros(globtp,c(86,106),globtp_holt)[2],
++   erros(globtp,c(86,106),globtp_arima)[2],
++   erros(globtp,c(86,106),globtp_ME)[2],
++   erros(globtp,c(86,106),globtp_MS)[2],
++   erros(globtp,c(86,106),globtp_Med)[2],
++   erros(globtp,c(86,106),globtp_MEx)[2],
++   erros(globtp,c(86,106),globtp_R)[2],
++   erros(globtp,c(86,106),globtp_R_r)[2],
++   erros(globtp,c(86,106),globtp_Op)[2],
++   erros(globtp,c(86,106),globtp_Op_r)[2],
++   erros(globtp,c(86,106),globtp_OpI)[2],
++   erros(globtp,c(86,106),globtp_OpI_r)[2],
++   
++   erros(HURON,c(80,98),HURON_holt)[2],
++   erros(HURON,c(80,98),HURON_arima)[2],
++   erros(HURON,c(80,98),HURON_ME)[2],
++   erros(HURON,c(80,98),HURON_MS)[2],
++   erros(HURON,c(80,98),HURON_Med)[2],
++   erros(HURON,c(80,98),HURON_MEx)[2],
++   erros(HURON,c(80,98),HURON_R)[2],
++   erros(HURON,c(80,98),HURON_R_r)[2],
++   erros(HURON,c(80,98),HURON_Op)[2],
++   erros(HURON,c(80,98),HURON_Op_r)[2],
++   erros(HURON,c(80,98),HURON_OpI)[2],
++   erros(HURON,c(80,98),HURON_OpI_r)[2],
++   
++   erros(SHEEP,c(60,73),SHEEP_holt)[2],
++   erros(SHEEP,c(60,73),SHEEP_arima)[2],
++   erros(SHEEP,c(60,73),SHEEP_ME)[2],
++   erros(SHEEP,c(60,73),SHEEP_MS)[2],
++   erros(SHEEP,c(60,73),SHEEP_Med)[2],
++   erros(SHEEP,c(60,73),SHEEP_MEx)[2],
++   erros(SHEEP,c(60,73),SHEEP_R)[2],
++   erros(SHEEP,c(60,73),SHEEP_R_r)[2],
++   erros(SHEEP,c(60,73),SHEEP_Op)[2],
++   erros(SHEEP,c(60,73),SHEEP_Op_r)[2],
++   erros(SHEEP,c(60,73),SHEEP_OpI)[2],
++   erros(SHEEP,c(60,73),SHEEP_OpI_r)[2],
++   
++   erros(summer,c(85,104),summer_holt)[2],
++   erros(summer,c(85,104),summer_arima)[2],
++   erros(summer,c(85,104),summer_ME)[2],
++   erros(summer,c(85,104),summer_MS)[2],
++   erros(summer,c(85,104),summer_Med)[2],
++   erros(summer,c(85,104),summer_MEx)[2],
++   erros(summer,c(85,104),summer_R)[2],
++   erros(summer,c(85,104),summer_R_r)[2],
++   erros(summer,c(85,104),summer_Op)[2],
++   erros(summer,c(85,104),summer_Op_r)[2],
++   erros(summer,c(85,104),summer_OpI)[2],
++   erros(summer,c(85,104),summer_OpI_r)[2],
++   
++   erros(ausgundeaths,c(73,90),ausgundeaths_holt)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_arima)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_ME)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_MS)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_Med)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_MEx)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_R)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_R_r)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_Op)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_Op_r)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_OpI)[2],
++   erros(ausgundeaths,c(73,90),ausgundeaths_OpI_r)[2],
++   
++   erros(Carga,c(74,91),Carga_holt)[2],
++   erros(Carga,c(74,91),Carga_arima)[2],
++   erros(Carga,c(74,91),Carga_ME)[2],
++   erros(Carga,c(74,91),Carga_MS)[2],
++   erros(Carga,c(74,91),Carga_Med)[2],
++   erros(Carga,c(74,91),Carga_MEx)[2],
++   erros(Carga,c(74,91),Carga_R)[2],
++   erros(Carga,c(74,91),Carga_R_r)[2],
++   erros(Carga,c(74,91),Carga_Op)[2],
++   erros(Carga,c(74,91),Carga_Op_r)[2],
++   erros(Carga,c(74,91),Carga_OpI)[2],
++   erros(Carga,c(74,91),Carga_OpI_r)[2]),
++   nrow = 10, ncol = 12,byrow = TRUE,dimnames = list(c("Cow","Buffsnow","CalFem","DowJones",
++                                      "Globtp","HURON","SHEEP","Summer",
++                                      "Ausgundeaths","Carga"),
++                                    c(" HOLT","ARIMA","ESTRUTURAL",
++                                      "MEDIA SIMPLES","MEDIANA",
++                                      "MEDIA_DOS_EXTREMOS","REGRESSAO",
++                                      "REGRESSAO_res","OPTIMAL","OPTIMAL_res",
++                                      "OPTIMAL I","OPTIMAL I_res")
++                                    ))
+> 
+> 
+> t(Tab_Erros)
+                        Cow Buffsnow   CalFem   DowJones     Globtp     HURON     SHEEP    Summer Ausgundeaths    Carga
+ HOLT              23.73769 697.3153 59.18213 0.11735335 0.02578405 0.7286874 10751.239 0.4601693    0.9164108 4.202530
+ARIMA              40.91691 346.1718 56.69716 0.12827777 0.02182719 0.5926132  6701.163 0.5936708    0.7740568 4.694358
+ESTRUTURAL         29.52407 709.7649 59.34465 0.17451169 0.02740391 1.4139703 11082.500 0.4950626    1.2271376 4.100448
+MEDIA SIMPLES      28.24763 528.4803 57.80544 0.11623643 0.02380132 0.7445359  8350.242 0.4981648    0.9000494 4.170132
+MEDIANA            28.41397 664.1046 58.04767 0.11410273 0.02580653 0.6519906  9883.213 0.5103434    0.9519071 4.248992
+MEDIA_DOS_EXTREMOS 28.36637 476.0066 57.72387 0.11990135 0.02296747 0.8106428  7866.439 0.4933237    0.6613864 4.144449
+REGRESSAO          35.57789 341.6590 68.62920 0.11479995 0.02178639 0.5899966  5798.826 0.6731952    0.8690608 4.470747
+REGRESSAO_res      30.41441 318.8697 70.93561 0.08708686 0.02042973 0.5502020  5029.864 0.6231119    0.7710127 4.135226
+OPTIMAL            71.71468 335.2397 56.82093 0.12712539 0.02185668 0.5939963  6423.237 0.7405248    0.7825229 4.595595
+OPTIMAL_res        58.00188 330.6539 56.58329 0.12069999 0.02130425 0.5756669  6269.663 0.6917978    0.7567231 4.477408
+OPTIMAL I          28.66462 498.2633 57.69433 0.11579434 0.02349995 0.6741325  7574.103 0.5042605    0.8753686 4.188565
+OPTIMAL I_res      28.60381 490.1414 57.67999 0.11544895 0.02346409 0.6698453  7597.874 0.5033038    0.8740992 4.179390
+> 
+> ### Salvando a tabela de erros ###
+> write.table(Tab_Erros,"Tab_Erros.txt")
+> 
+> # Gráficos MSE
+> cw=as.numeric(Tab_Erros[1,])
+> b=as.numeric(Tab_Erros[2,])
+> c=as.numeric(Tab_Erros[3,])
+> d=as.numeric(Tab_Erros[4,])
+> g=as.numeric(Tab_Erros[5,])
+> h=as.numeric(Tab_Erros[6,])
+> s=as.numeric(Tab_Erros[7,])
+> su=as.numeric(Tab_Erros[8,])
+> a=as.numeric(Tab_Erros[9,])
+> cr=as.numeric(Tab_Erros[10,])
+> names(cw)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(b)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(c)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(d)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(g)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(h)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(s)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(su)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(a)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> names(cr)=c("H","A","ME","MS","Med","Mex","Reg","Reg*","Op","Op*","OpI","OpI*")
+> 
+> barplot(cw,main="MSE de Cow")
+> barplot(b,main="MSE de Buffsnow")
+> barplot(c,main="MSE de Calfem")
+> barplot(d,main="MSE de DowJones")
+> barplot(g,main="MSE de Globtp")
+> barplot(h,main="MSE de Huron")
+> barplot(s,main="MSE de Sheep")
+> barplot(su,main="MSE de Summer")
+> barplot(a,main="MSE de Ausgundeaths")
+> barplot(cr,main="MSE de Carga")
+> 
+> ################################################################################
+> ############################ Salvando as Previsões #############################
+> 
+> #### Salvando as previsões de Holt  ###
+> write.table(cow_holt,"cow_holt.txt")
+> write.table(buffsnow_holt,"buffsnow_holt.txt")
+> write.table(calfem_holt,"calfem_holt.txt")
+> write.table(DowJones_holt,"DowJones_holt.txt")
+> write.table(globtp_holt,"globtp_holt.txt")
+> write.table(HURON_holt,"HURON_holt.txt")
+> write.table(SHEEP_holt,"SHEEP_holt.txt")
+> write.table(summer_holt,"summer_holt.txt")
+> write.table(ausgundeaths_holt,"ausgundeaths_holt.txt")
+> write.table(Carga_holt,"Carga_holt.txt")
+> 
+> #### Salvando as previsões de ARIMA  ###
+> write.table(cow_arima,"cow_arima.txt")
+> write.table(buffsnow_arima,"buffsnow_arima.txt") 
+> write.table(calfem_arima,"calfem_arima.txt") 
+> write.table(DowJones_arima,"DowJones_arima.txt")
+> write.table(globtp_arima,"globtp_arima.txt")
+> write.table(HURON_arima,"HURON_arima.txt")
+> write.table(SHEEP_arima,"SHEEP_arima.txt")
+> write.table(summer_arima,"summer_arima.txt")
+> write.table(ausgundeaths_arima,"ausgundeaths_arima.txt")
+> write.table(Carga_arima,"Carga_arima.txt")
+> 
+> #### Salvando as previsões do Modelo Estrutural ###
+> write.table(cow_ME,"cow_ME.txt")
+> write.table(buffsnow_ME,"buffsnow_ME.txt") 
+> write.table(calfem_ME,"calfem_ME.txt") 
+> write.table(DowJones_ME,"DowJones_ME.txt")
+> write.table(globtp_ME,"globtp_ME.txt")
+> write.table(HURON_ME,"HURON_ME.txt")
+> write.table(SHEEP_ME,"SHEEP_ME.txt")
+> write.table(summer_ME,"summer_ME.txt")
+> write.table(ausgundeaths_ME,"ausgundeaths_ME.txt")
+> write.table(Carga_ME,"Carga_ME.txt")
+> 
+> ### Salvando as previsões de Média Simples ###
+> write.table(cow_MS,"cow_MS.txt")
+> write.table(buffsnow_MS,"buffsnow_MS.txt")
+> write.table(calfem_MS,"calfem_MS.txt")
+> write.table(DowJones_MS,"DowJones_MS.txt")
+> write.table(globtp_MS,"globtp_MS.txt")
+> write.table(HURON_MS,"HURON_MS.txt")
+> write.table(SHEEP_MS,"SHEEP_MS.txt")
+> write.table(summer_MS,"summer_MS.txt")
+> write.table(ausgundeaths_MS,"ausgundeaths_MS.txt")
+> write.table(Carga_MS,"Carga_MS.txt")
+> 
+> ### Salvando as previsões Mediana ###
+> write.table(cow_Med,"cow_Med.txt")
+> write.table(buffsnow_Med,"buffsnow_Med.txt")
+> write.table(calfem_Med,"calfem_Med.txt")
+> write.table(DowJones_Med,"DowJones_Med.txt")
+> write.table(globtp_Med,"globtp_Med.txt")
+> write.table(HURON_Med,"HURON_Med.txt")
+> write.table(SHEEP_Med,"SHEEP_Med.txt")
+> write.table(summer_Med,"summer_Med.txt")
+> write.table(ausgundeaths_Med,"ausgundeaths_Med.txt")
+> write.table(Carga_Med,"Carga_Med.txt")
+> 
+> ### Salvando as previsões Média dos extremos ###
+> write.table(cow_MEx,"cow_MEx.txt")
+> write.table(buffsnow_MEx,"buffsnow_MEx.txt")
+> write.table(calfem_MEx,"calfem_MEx.txt")
+> write.table(DowJones_MEx,"DowJones_MEx.txt")
+> write.table(globtp_MEx,"globtp_MEx.txt")
+> write.table(HURON_MEx,"HURON_MEx.txt")
+> write.table(SHEEP_MEx,"SHEEP_MEx.txt")
+> write.table(summer_MEx,"summer_MEx.txt")
+> write.table(ausgundeaths_MEx,"ausgundeaths_MEx.txt")
+> write.table(Carga_MEx,"Carga_MEx.txt")
+> 
+> ### Salvando as previsẽes de regressão ###
+> write.table(cow_R,"cow_R.txt")
+> write.table(buffsnow_R,"buffsnow_R.txt")
+> write.table(calfem_R,"calfem_R.txt")
+> write.table(DowJones_R,"DowJones_R.txt")
+> write.table(globtp_R,"globtp_R.txt")
+> write.table(HURON_R,"HURON_R.txt")
+> write.table(SHEEP_R,"SHEEP_R.txt")
+> write.table(summer_R,"summer_R.txt")
+> write.table(ausgundeaths_R,"ausgundeaths_R.txt")
+> write.table(Carga_R,"Carga_R.txt")
+> 
+> ### Salvando as previsões  Optimal ###
+> write.table(cow_Op,"cow_Op.txt")
+> write.table(buffsnow_Op,"buffsnow_Op.txt")
+> write.table(calfem_Op,"calfem_Op.txt")
+> write.table(DowJones_Op,"DowJones_Op.txt")
+> write.table(globtp_Op,"globtp_Op.txt")
+> write.table(HURON_Op,"HURON_Op.txt")
+> write.table(SHEEP_Op,"SHEEP_Op.txt")
+> write.table(summer_Op,"summer_Op.txt")
+> write.table(ausgundeaths_Op,"ausgundeaths_Op.txt")
+> write.table(Carga_Op,"Carga_Op.txt")
+> 
+> ### Salvando as previsões  Optimal com indenpendência ###
+> write.table(cow_OpI,"cow_OpI.txt")
+> write.table(buffsnow_OpI,"buffsnow_OpI.txt")
+> write.table(calfem_OpI,"calfem_OpI.txt")
+> write.table(DowJones_OpI,"DowJones_OpI.txt")
+> write.table(globtp_OpI,"globtp_OpI.txt")
+> write.table(HURON_OpI,"HURON_OpI.txt")
+> write.table(SHEEP_OpI,"SHEEP_OpI.txt")
+> write.table(summer_OpI,"summer_OpI.txt")
+> write.table(ausgundeaths_OpI,"ausgundeaths_OpI.txt")
+> write.table(Carga_OpI,"Carga_OpI.txt")
+> 
+> ### Salvando as previsẽes de regressão reestimada ###
+> write.table(cow_R_r,"cow_R_res.txt")
+> write.table(buffsnow_R_r,"buffsnow_R_res.txt")
+> write.table(calfem_R_r,"calfem_R_res.txt")
+> write.table(DowJones_R_r,"DowJones_R_res.txt")
+> write.table(globtp_R_r,"globtp_R_res.txt")
+> write.table(HURON_R_r,"HURON_R_res.txt")
+> write.table(SHEEP_R_r,"SHEEP_R_res.txt")
+> write.table(summer_R_r,"summer_R_res.txt")
+> write.table(ausgundeaths_R_r,"ausgundeaths_R_res.txt")
+> write.table(Carga_R_r,"Carga_R_res.txt")
+> 
+> ### Salvando as previsões  Optimal reestimada###
+> write.table(cow_Op_r,"cow_Op_res.txt")
+> write.table(buffsnow_Op_r,"buffsnow_Op_res.txt")
+> write.table(calfem_Op_r,"calfem_Op_res.txt")
+> write.table(DowJones_Op_r,"DowJones_Op_res.txt")
+> write.table(globtp_Op_r,"globtp_Op_res.txt")
+> write.table(HURON_Op_r,"HURON_Op_res.txt")
+> write.table(SHEEP_Op_r,"SHEEP_Op_res.txt")
+> write.table(summer_Op_r,"summer_Op_res.txt")
+> write.table(ausgundeaths_Op_r,"ausgundeaths_Op_res.txt")
+> write.table(Carga_Op_r,"Carga_Op_res.txt")
+> 
+> ### Salvando as previsões  Optimal com indenpendência reestimada###
+> write.table(cow_OpI_r,"cow_OpI_res.txt")
+> write.table(buffsnow_OpI_r,"buffsnow_OpI_res.txt")
+> write.table(calfem_OpI_r,"calfem_OpI_res.txt")
+> write.table(DowJones_OpI_r,"DowJones_OpI_res.txt")
+> write.table(globtp_OpI_r,"globtp_OpI_res.txt")
+> write.table(HURON_OpI_r,"HURON_OpI_res.txt")
+> write.table(SHEEP_OpI_r,"SHEEP_OpI_res.txt")
+> write.table(summer_OpI_r,"summer_OpI_res.txt")
+> write.table(ausgundeaths_OpI_r,"ausgundeaths_OpI_res.txt")
+> write.table(Carga_OpI_r,"Carga_OpI_res.txt")
+> 
