@@ -33,11 +33,11 @@ Neste diretório os arquivos estão organizados da seguinte forma:
 
 :file_folder: [Dados](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Dados) : Pasta com as 10 séries originais usadas neste trabalho
 
-:file_folder: [Gráficos](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Gr%C3%A1ficos) : Pasta com todos os gráficos gerados na análise
+:file_folder: [Gráficos](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Graficos) : Pasta com todos os gráficos gerados na análise
 
-:file_folder: [Previsões](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Previs%C3%B5es) : Pasta com todas as previsões geradas na análise
+:file_folder: [Previsões](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Previsoes) : Pasta com todas as previsões geradas na análise
 
-:page*facing_up: [Artigo_Brazilian_Journal_Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Artigo_Brazilian_Journal*%20Business.pdf): Artigo publicado no Brazilian Journal of Business
+:page_facing_up: [Artigo_Brazilian_Journal_Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Artigo_Brazilian_Journal_Business.pdf): Artigo publicado no Brazilian Journal of Business
 
 :page_facing_up: [Monografia_Leiliane.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Monografia_Leiliane.pdf): Trabalho de Conclusão de Curso Completo
 
