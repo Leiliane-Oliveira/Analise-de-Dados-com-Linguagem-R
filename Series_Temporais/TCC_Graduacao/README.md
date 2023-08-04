@@ -33,9 +33,9 @@ Neste diretório os arquivos estão organizados da seguinte forma:
 
 :file_folder: [Dados](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Dados) : Pasta com as 10 séries originais usadas neste trabalho
 
-:file_folder: [Gráficos](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Graficos) : Pasta com todos os gráficos gerados na análise
+:file_folder: [Graficos](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Graficos) : Pasta com todos os gráficos gerados na análise
 
-:file_folder: [Previsões](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Previsoes) : Pasta com todas as previsões geradas na análise
+:file_folder: [Previsoes](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Previsoes) : Pasta com todas as previsões geradas na análise
 
 :page_facing_up: [Artigo_Brazilian_Journal_Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Artigo_Brazilian_Journal_Business.pdf): Artigo publicado no Brazilian Journal of Business
 
