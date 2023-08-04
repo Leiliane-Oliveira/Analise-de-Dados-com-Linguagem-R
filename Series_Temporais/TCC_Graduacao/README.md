@@ -20,7 +20,7 @@ Neste trabalho utilizou-se a linguagem R e os pacotes [TSA](https://cran.r-proje
 Como conclusão verificou-se que as previsões pelo método ARIMA apresentaram um melhor desempenho em 60% das séries estudadas quando comparado aos modelos de previsão individual e em 70% das séries pelo menos um modelo de previsão de combinação se mostrou mais eficiente que as previsões individuais. Portando, combinar as diversidades de métodos de previsão individuais garante efetivamente uma melhor precisão das previsões e a combinação por regressão mostrou melhor desempenho que as outras combinações.
 
 <blockquote style="background-color: salmon; padding: 10px; color: black;">
-Após a aprovação do trabalho pela banca de professores da UFJF, publiquei um <a href="https://simpep.feb.unesp.br/abrir_arquivo_pdf.php?tipo=artigo&evento=10&art=266&cad=22556&opcao=com_id">resumo</a> no ANAIS do XXII Simpósio de Engenharia de Produção (<a href="https://simpep.feb.unesp.br/index.php">SIMPEP</a>), e posteriormente, em 2020, um artigo no <a href="https://ojs.brazilianjournals.com.br/bjb/article/view/13472">Brazilian Journal of Business</a>.
+Após a aprovação do trabalho pela banca de professores da UFJF, publiquei um <a href="https://simpep.feb.unesp.br/abrir_arquivo_pdf.php?tipo=artigo&evento=10&art=266&cad=22556&opcao=com_id">resumo</a> no ANAIS do XXII Simpósio de Engenharia de Produção (<a href="https://simpep.feb.unesp.br/index.php">SIMPEP</a>), e posteriormente, em 2020, um artigo no <a href="https://www.brazilianjournals.com/index.php/BJB/article/view/13472">Brazilian Journal of Business</a>.
 </blockquote><br/>
 
 [^1]: O pacote "TSA" é um pacote fundamental para análise de séries temporais no R. Ele fornece várias funções para modelar, analisar e prever dados temporais. Com o "TSA", os usuários podem ajustar modelos ARIMA (AutoRegressive Integrated Moving Average), fazer decomposição de séries temporais, realizar testes estatísticos para estacionariedade, entre outras análises relacionadas a séries temporais.<br/>
@@ -31,25 +31,25 @@ Após a aprovação do trabalho pela banca de professores da UFJF, publiquei um 
 
 Neste diretório os arquivos estão organizados da seguinte forma:
 
-:file_folder: [Dados](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o/Dados) : Pasta com as 10 séries originais usadas neste trabalho
+:file_folder: [Dados](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Dados) : Pasta com as 10 séries originais usadas neste trabalho
 
-:file_folder: [Gráficos](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o/Gr%C3%A1ficos) : Pasta com todos os gráficos gerados na análise
+:file_folder: [Gráficos](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Gr%C3%A1ficos) : Pasta com todos os gráficos gerados na análise
 
-:file_folder: [Previsões](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/TCC_Gradua%C3%A7%C3%A3o/Previs%C3%B5es) : Pasta com todas as previsões geradas na análise
+:file_folder: [Previsões](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/TCC_Graduacao/Previs%C3%B5es) : Pasta com todas as previsões geradas na análise
 
-:page_facing_up: [Artigo_Brazilian_Journal* Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Artigo_Brazilian_Journal_%20Business.pdf): Artigo publicado no Brazilian Journal of Business
+:page*facing_up: [Artigo_Brazilian_Journal_Business.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Artigo_Brazilian_Journal*%20Business.pdf): Artigo publicado no Brazilian Journal of Business
 
-:page_facing_up: [Monografia_Leiliane.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Monografia_Leiliane.pdf): Trabalho de Conclusão de Curso Completo
+:page_facing_up: [Monografia_Leiliane.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Monografia_Leiliane.pdf): Trabalho de Conclusão de Curso Completo
 
-:page_facing_up: [Monografia_Leilane_Apt.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Monografia_Leilane_Apt.pdf): Apresentação do TCC na Defesa de Monografia
+:page_facing_up: [Monografia_Leilane_Apt.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Monografia_Leilane_Apt.pdf): Apresentação do TCC na Defesa de Monografia
 
-:page_facing_up: [XXII_SIMPEP_Art_266.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/XXII_SIMPEP_Art_266.pdf): Resumo publicado no SIMPEP
+:page_facing_up: [XXII_SIMPEP_Art_266.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/XXII_SIMPEP_Art_266.pdf): Resumo publicado no SIMPEP
 
-:page_facing_up: [Monografia.r](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Monografia.r): Script em R
+:page_facing_up: [Monografia.r](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Monografia.r): Script em R
 
-:page_facing_up: [OutputR_Monografia.txt](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/OutputR_Monografia.txt): Output do R
+:page_facing_up: [OutputR_Monografia.txt](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/OutputR_Monografia.txt): Output do R
 
-:chart_with_downwards_trend: [Tab_Erros.txt](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/TCC_Gradua%C3%A7%C3%A3o/Tab_Erros.txt): Tabela com os MSE dos modelos de previsão analisados
+:chart_with_downwards_trend: [Tab_Erros.txt](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Series_Temporais/TCC_Graduacao/Tab_Erros.txt): Tabela com os MSE dos modelos de previsão analisados
 
 # 3. Referências
 
