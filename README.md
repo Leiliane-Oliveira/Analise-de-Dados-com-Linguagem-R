@@ -73,7 +73,7 @@ Nos projetos de Inferência Estatística tenho como objetivo simular o Teorema d
 
 ### 3.2.1 Teorema do Limite Central
 
-O Teorema Central do Limite é crucial no contexto da Inferência Estatística, pois ele fornece a base para a distribuição das médias amostrais. Quando a amostra é grande, a distribuição das médias amostrais se aproxima de uma distribuição normal. Isso é fundamental para a construção de intervalos de confiança e para realizar testes de hipóteses sobre parâmetros populacionais. [Neste projeto]() simulou-se esse teorema no R.
+O Teorema Central do Limite é crucial no contexto da Inferência Estatística, pois ele fornece a base para a distribuição das médias amostrais. Quando a amostra é grande, a distribuição das médias amostrais se aproxima de uma distribuição normal. Isso é fundamental para a construção de intervalos de confiança e para realizar testes de hipóteses sobre parâmetros populacionais. [Neste projeto](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Inferencia_Estatistica/TLC) simulou-se esse teorema no R.
 
 # 4. Referências
 
