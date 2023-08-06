@@ -14,7 +14,7 @@ Em outras palavras, mesmo que a variável aleatória original não seja normalme
 
 Para testar essa poderosa propriedade, podemos usar o software R para realizar um experimento simples. Primeiro, geramos uma distribuição normal e outra exponencial. Em seguida, extraímos 1000 amostras de tamanho "n" (sendo "n" maior que 30) de cada distribuição e registramos a média de cada amostra.
 
-Ao plotar os histogramas das médias amostrais para ambas as distribuições, observaremos que, mesmo a distribuição original sendo exponencial, os histogramas se aproximam de uma distribuição normal à medida que aumentamos o tamanho das amostras. Como podemos ver pelo gráfico gerado pela simulação realizada em [Simulando_TLC.R]().
+Ao plotar os histogramas das médias amostrais para ambas as distribuições, observaremos que, mesmo a distribuição original sendo exponencial, os histogramas se aproximam de uma distribuição normal à medida que aumentamos o tamanho das amostras. Como podemos ver pelo gráfico gerado pela simulação realizada em [Simulando_TLC.R](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Inferencia_Estatistica/TLC/Simulando_TLC.R).
 
 <div align="center">
   <img src="grafico_TLC.png" alt="header" style="width: 61.2%;">
