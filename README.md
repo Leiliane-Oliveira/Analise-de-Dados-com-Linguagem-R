@@ -12,7 +12,8 @@ Repositório com projetos que vão desde análise de dados à machine learning c
     -   [3.1. Séries Temporais](#31-séries-temporais)
         -   [3.1.1. TCC Graduação](#311-tcc-graduação)
         -   [3.1.2. Metodologias de Imputação de Dados](#312-metodologias-de-imputação-de-dados)
-    -   [3.2. Projeto2](#32-projeto-2)
+    -   [3.2. Inferência Estatística](#32-inferência-estatística)
+        -   [3.2.1. Teorema do Limite Central](#321-teorema-do-limite-central)
 -   [4. Referências](#4-referências)
 
 # 1. Introdução
@@ -40,8 +41,8 @@ Projetos de Análise de Dados com R
 ├── Series_Temporais
 │   ├── TCC_Graduacao
 │   ├── Imputacao
-├── Projeto2
-|   ├── Pasta
+├── Inferencia_Estatistica
+|   ├── TLC
 ```
 
 # 3. Projetos
@@ -64,9 +65,15 @@ Nos projetos de Séries Temporais tenho como objetivo abordar desde o tratamento
 
 [Neste projeto](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Series_Temporais/Imputacao), tenho como objetivo praticar alguns dos métodos de imputação de dados como: Forward fill, Backward fill, Média Móvel, Imputação linear e Imputação Polinomial. Abordo, também, o problema de Lookahead. Utilizo a série histórica do Instituto Brasileiro de Geografia e Estatística (IBGE) da taxa de desocupação no Brasil.
 
-## 3.2. Projeto 2
+## 3.2. Inferência Estatística
 
-Descrever
+A inferência estatística é um ramo da estatística que lida com o processo de tirar conclusões ou fazer estimativas sobre uma população maior com base em informações obtidas de uma amostra representativa dessa população. Envolve a utilização de técnicas estatísticas para extrair insights, realizar testes de hipóteses, construir intervalos de confiança e tomar decisões informadas sobre características desconhecidas da população, utilizando os dados amostrais disponíveis. Em resumo, a inferência estatística permite generalizar informações da amostra para a população, com um nível definido de confiança estatística.
+
+Nos projetos de Inferência Estatística tenho como objetivo simular o Teorema do Limite Central (TLC) e abordar diferentes Testes de Hipóteses.
+
+### 3.2.1 Teorema do Limite Central
+
+O Teorema Central do Limite é crucial no contexto da Inferência Estatística, pois ele fornece a base para a distribuição das médias amostrais. Quando a amostra é grande, a distribuição das médias amostrais se aproxima de uma distribuição normal. Isso é fundamental para a construção de intervalos de confiança e para realizar testes de hipóteses sobre parâmetros populacionais. [Neste projeto]() simulou-se esse teorema no R.
 
 # 4. Referências
 
