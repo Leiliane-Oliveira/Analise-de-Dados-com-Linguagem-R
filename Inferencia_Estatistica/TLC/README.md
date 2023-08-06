@@ -1,14 +1,12 @@
-<div style="display: flex;">
-  <div style="flex: 1.64;">
-    <img src="header_TLC.png" alt="header"style="width: 100%;">
-  </div>
-  <div style="flex: 0.6;">
-    <img src="Tabuleiro_Galton.gif" alt="header" style="width: 100%;">
-  </div>
+<div align="center">
+  <img src="header_TLC.png" alt="header" style="width: 100%;">
 </div>
-<br/>
 
 O [Teorema do Limite Central](https://pt.wikipedia.org/wiki/Teorema_central_do_limite) é um dos pilares fundamentais da estatística e tem um papel crucial na inferência estatística. Ele estabelece que, à medida que o tamanho de uma amostra aleatória aumenta, a distribuição das médias amostrais se aproxima cada vez mais de uma distribuição normal, independentemente da forma da distribuição da variável aleatória subjacente.
+
+<div align="center">
+  <img src="Tabuleiro_Galton.gif" alt="header" style="width: 40%;">
+</div>
 
 Em outras palavras, mesmo que a variável aleatória original não seja normalmente distribuída, a distribuição das médias de várias amostras será aproximadamente normal. Esse resultado é extremamente útil, pois permite que a média da amostra seja utilizada como estimativa da média populacional, proporcionando mais confiança nas inferências estatísticas.
 
