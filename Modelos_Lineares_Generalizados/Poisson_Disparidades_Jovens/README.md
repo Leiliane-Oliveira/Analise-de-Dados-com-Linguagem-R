@@ -58,7 +58,7 @@ Neste diretório os arquivos estão organizados da seguinte forma:
 
 :page_facing_up: [MLG_TX_Desocupacao.r](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/MLG_TX_Desocupacao.R): Script da análise em R
 
-:page_facing_up: [OutputR_MLG.html](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/OutputR_MLG.html): Output do R
+:page_facing_up: [OutputR_MLG.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/OutputR_MLG.pdf): Output do R
 
 # 3. Referências
 
