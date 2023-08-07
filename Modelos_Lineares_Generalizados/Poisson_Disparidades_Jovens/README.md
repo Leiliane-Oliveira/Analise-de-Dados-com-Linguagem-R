@@ -19,33 +19,22 @@ instrução mais inferiores. Pela Figura 1.1, podemos observar a distribuição 
 <div align="center">
   <img src="Resultados/Rplot.png" alt="header" >
 </div>
-<p align="center"><sup><sub><span style="font-size: 1.2em;"><i>Figura 1.1. Taxa de Desocupação dos Jovens (15-29) de Minas Gerais, segundo Sexo, Raça, Nível de
-Instrução e Idade – 3º Trimestre de 2016.<br/>
+<p align="center"><sup><sub><span style="font-size: 1.4em;"><i>Figura 1.1. Taxa de Desocupação dos Jovens (15-29) de Minas Gerais, segundo Sexo, Raça, Nível de Instrução e Idade – 3º Trimestre de 2016.<br/>
 As categorias de Nível de Instrução são: 1-Sem instrução, 2-Fundamental incompleto ou equivalente - Fundamentalcompleto ou equivalente, 4-Médio incompleto ou equivalente, 5-Médio completo ou equivalente, 6-Superior incompleto ou equivalente, 7-Superior completo ou equivalente.</i></span></sub></sup></p>
 
-Como estratégia de modelagem, iniciamos ajustando o modelo nulo, depois apenas o offset,
-e em seguida inserindo uma variável explicativa de cada vez, em seguida acrescentamos as
-interações possíveis, sempre verificando a significância do(s) termo(s) inserido(s). Foram ajustados
-21 modelos, com o intuito de verificar os apontamentos da literatura bem como verificar se existe
-efeito de interação entre as características sociodemográficas dos jovens na taxa de desocupação.
+Como estratégia de modelagem, iniciamos ajustando o modelo nulo, depois apenas o offset,e em seguida inserindo uma variável explicativa de cada vez, em seguida acrescentamos asinterações possíveis, sempre verificando a significância do(s) termo(s) inserido(s). Foram ajustados 21 modelos, com o intuito de verificar os apontamentos da literatura bem como verificar se existe efeito de interação entre as características sociodemográficas dos jovens na taxa de desocupação.
 
-Assumimos o nível de significância de 5% em nossas análises. A avaliação da qualidade do
-modelo se deu pelas estatísticas: Deviance (D), Qui-quadrado de Pearson (X²) e pelo Critério de Informação de Akaike (AIC), conforme indicado por Dobson (2002). Comparações entre modelos
-foram realizadas pelo teste de diferença de Deviance, para aqueles modelos validados pelo teste da
-Deviance.
+Assumimos o nível de significância de 5% em nossas análises. A avaliação da qualidade do modelo se deu pelas estatísticas: Deviance (D), Qui-quadrado de Pearson (X²) e pelo Critério de Informação de Akaike (AIC), conforme indicado por Dobson (2002). Comparações entre modelos foram realizadas pelo teste de diferença de Deviance, para aqueles modelos validados pelo teste da Deviance.
 
 O modelo com melhor ajuste foi formalizado conforme Figura 1.2:
 
 <div align="center">
   <img src="Resultados/Modelo.png" alt="header" >
 </div>
-<p align="center"><sup><sub><span style="font-size: 1.2em;"><i>Figura 1.2. Formalização do modelo com melhor ajuste.</i></span></sub></sup></p>
+<p align="center"><sup><sub><span style="font-size: 1.4em;"><i>Figura 1.2. Formalização do modelo com melhor ajuste.</i></span></sub></sup></p>
 
 onde X1 é a variável sexo, sendo 0= masculino e 1= feminino; X2 é a variável raça, sendo 0= Brancos
-e 1=Pretos e Pardos; X3= variável faixa etária, sendo 1=18 a 24 anos e 0=caso contrário, X4= variável
-faixa etária, sendo 1=25 a 29 anos e 0=caso contrário, e Xj a variável dummy de nível de instrução,
-sendo j=5=Fundamental incompleto ou equivalente, j=6=Fundamental completo ou equivalente,
-j=7=Médio incompleto ou equivalente, j=8=Médio completo ou equivalente, j=9=Superior
+e 1=Pretos e Pardos; X3= variável faixa etária, sendo 1=18 a 24 anos e 0=caso contrário, X4= variável faixa etária, sendo 1=25 a 29 anos e 0=caso contrário, e Xj a variável dummy de nível de instrução, sendo j=5=Fundamental incompleto ou equivalente, j=6=Fundamental completo ou equivalente, j=7=Médio incompleto ou equivalente, j=8=Médio completo ou equivalente, j=9=Superior
 incompleto ou equivalente e j=10=Superior completo ou equivalente. **Assim, a baseline do modelo
 é, sexo masculino, faixa etária de 15 a 17 anos, jovens brancos e sem instrução.**
 
@@ -69,7 +58,7 @@ Neste diretório os arquivos estão organizados da seguinte forma:
 
 :page_facing_up: [MLG_TX_Desocupacao.r](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/MLG_TX_Desocupacao.R): Script da análise em R
 
-:page_facing_up: [OutputR_MLG.txt](): Output do R
+:page_facing_up: [OutputR_MLG.html](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/OutputR_MLG.html): Output do R
 
 # 3. Referências
 
