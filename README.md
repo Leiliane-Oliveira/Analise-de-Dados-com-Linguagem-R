@@ -14,6 +14,8 @@ Repositório com projetos que vão desde análise de dados à machine learning c
         -   [3.1.2. Metodologias de Imputação de Dados](#312-metodologias-de-imputação-de-dados)
     -   [3.2. Inferência Estatística](#32-inferência-estatística)
         -   [3.2.1. Teorema do Limite Central](#321-teorema-do-limite-central)
+    -   [3.3. Modelos Lineares Generalizados](#33-modelos-lineares-generalizados)
+        -   [3.3.1. Disparidades da Taxa de Desocupação dos Jovens](#331-disparidades-da-taxa-de-desocupação-dos-jovens)
 -   [4. Referências](#4-referências)
 
 # 1. Introdução
@@ -43,6 +45,8 @@ Projetos de Análise de Dados com R
 │   ├── Imputacao
 ├── Inferencia_Estatistica
 |   ├── TLC
+├── Modelos_Lineares_Generalizados
+|   ├── Poisson_Disparidades_Jovens
 ```
 
 # 3. Projetos
@@ -74,6 +78,18 @@ Nos projetos de Inferência Estatística tenho como objetivo simular o Teorema d
 ### 3.2.1 Teorema do Limite Central
 
 O Teorema Central do Limite é crucial no contexto da Inferência Estatística, pois ele fornece a base para a distribuição das médias amostrais. Quando a amostra é grande, a distribuição das médias amostrais se aproxima de uma distribuição normal. Isso é fundamental para a construção de intervalos de confiança e para realizar testes de hipóteses sobre parâmetros populacionais. [Neste projeto](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Inferencia_Estatistica/TLC) simulou-se esse teorema no R.
+
+## 3.3. Modelos Lineares Generalizados
+
+Modelos Lineares Generalizados (GLMs) são uma extensão dos modelos de regressão linear tradicionais, que permitem lidar com uma variedade mais ampla de distribuições de respostas e relações entre variáveis independentes e dependentes. Eles foram propostos por John Nelder e Robert Wedderburn em 1972 como uma forma de unificar vários tipos de modelos de regressão em um único framework.
+
+Os GLMs são uma ferramenta poderosa na análise estatística, pois permitem lidar com uma variedade de situações em que os pressupostos dos modelos lineares tradicionais podem ser violados. Eles são usados em uma ampla gama de campos, como ciências sociais, medicina, economia e engenharia, sempre que os dados têm naturezas diferentes das que os modelos lineares tradicionais podem lidar de forma eficaz.
+
+Nos projetos de MLG pretendo ajustar diversos modelos em dados reais.
+
+### 3.3.1 Disparidades da Taxa de Desocupação dos Jovens
+
+[Este projeto](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens) teve como objetivo verificar as disparidades da taxa de desocupação dos jovens, de 15 a 29 anos de idade, do estado de Minas Gerais. Para isso usou-se os dados da Pesquisa Nacional por Amostra de Domicílios Contínua [(PNAD Contínua)](https://www.ibge.gov.br/estatisticas/sociais/trabalho/17270-pnad-continua.html), da edição do terceiro trimestre de 2016, do Instituto Brasileiro de Estatística e Geografia [(IBGE)](https://www.ibge.gov.br/pt/inicio.html). Através de modelagem de Poisson, investigou-se os efeitos do sexo, raça, faixa etária e nível de instrução, na variação da taxa de desocupação dada por tais características sociodemográficas.
 
 # 4. Referências
 
