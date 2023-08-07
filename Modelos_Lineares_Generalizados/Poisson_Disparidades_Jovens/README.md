@@ -49,25 +49,25 @@ j=7=Médio incompleto ou equivalente, j=8=Médio completo ou equivalente, j=9=Su
 incompleto ou equivalente e j=10=Superior completo ou equivalente. **Assim, a baseline do modelo
 é, sexo masculino, faixa etária de 15 a 17 anos, jovens brancos e sem instrução.**
 
-> No arquivo [MLG_LEILIANE OLIVEIRA.pdf]() neste repositório você encontra mais detalhes dos ajustes dos 21 modelos.
+> No arquivo [MLG_LEILIANE_OLIVEIRA.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/MLG_LEILIANE_OLIVEIRA.pdf) neste repositório você encontra mais detalhes dos ajustes dos 21 modelos.
 
-> Essa análise teve um resumo espandido publicado no no International Union for the Scientific Study of Population [IUSSP](https://iussp.org/en/cape-town-2017) em 2 de nov de 2017 e pode ser encontrado [aqui]().
+> Essa análise teve um resumo espandido publicado no no International Union for the Scientific Study of Population [IUSSP](https://iussp.org/en/cape-town-2017) em 2 de nov de 2017 e pode ser encontrado [aqui](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/IUSSP_LEILIANE_OLIVEIRA.pdf).
 
 # 2. Organização do Diretório
 
 Neste diretório os arquivos estão organizados da seguinte forma:
 
-:file_folder: [Resultados]() : Pasta com os resultados, tabelas e gráficos gerados nesta análise
+:file_folder: [Resultados](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/tree/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/Resultados) : Pasta com os resultados, tabelas e gráficos gerados nesta análise
 
-:page_facing_up: [Taxa_de_desocupação_Jovens_15_29_MG](): Dados tratados da análise
+:page_facing_up: [Taxa_de_desocupacao_Jovens_15_29_MG.csv](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/Taxa_de_desocupacao_Jovens_15_29_MG.csv): Dados tratados da análise
 
-:page_facing_up: [IUSSP_LEILIANE OLIVEIRA.pdf](): Resumo estendido publicado no International Union for the Scientific Study of Population [IUSSP](https://iussp.org/en/cape-town-2017) em 2 de nov de 2017.
+:page_facing_up: [IUSSP_LEILIANE_OLIVEIRA.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/IUSSP_LEILIANE_OLIVEIRA.pdf): Resumo estendido publicado no International Union for the Scientific Study of Population [IUSSP](https://iussp.org/en/cape-town-2017) em 2 de nov de 2017.
 
-:page_facing_up: [MLG_LEILIANE OLIVEIRA.pdf](): Artigo elaborado para a disciplina de Modelos Lineares Generalizados contendo os resultados desta análise
+:page_facing_up: [MLG_LEILIANE_OLIVEIRA.pdf](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/MLG_LEILIANE_OLIVEIRA.pdf): Artigo elaborado para a disciplina de Modelos Lineares Generalizados contendo os resultados desta análise
 
-:page_facing_up: [Tratamento_dos_dados.sps](): Script em SPSS dos tratamentos iniciais dos dados
+:page_facing_up: [Tratamento_dos_dados.sps](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/Tratamento_dos_dados.sps): Script em SPSS dos tratamentos iniciais dos dados
 
-:page_facing_up: [MLG_TX_Desocupacao.r](): Script da análise em R
+:page_facing_up: [MLG_TX_Desocupacao.r](https://github.com/Leiliane-Oliveira/Analise-de-Dados-com-Linguagem-R/blob/main/Modelos_Lineares_Generalizados/Poisson_Disparidades_Jovens/MLG_TX_Desocupacao.R): Script da análise em R
 
 :page_facing_up: [OutputR_MLG.txt](): Output do R
 
