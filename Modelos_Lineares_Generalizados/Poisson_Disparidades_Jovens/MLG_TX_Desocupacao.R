@@ -1,7 +1,7 @@
 #Modelando a taxa de desocupaçãodos jovens 15-29 de Minas Gerais
 
 #LENDO OS DADOS
-dados<-read.csv("Dados/Taxa_de_desocupação_Jovens_15_29_MG.csv", sep=";") 
+dados<-read.csv("Taxa_de_desocupação_Jovens_15_29_MG.csv", sep=";") 
 
 str(dados)
 
