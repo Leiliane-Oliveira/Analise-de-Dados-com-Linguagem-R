@@ -93,4 +93,4 @@ Nos projetos de MLG pretendo ajustar diversos modelos em dados reais.
 
 # 4. Referências
 
-As referências são apresentadas no README de cada projeto.
+As referências são apresentadas no README de cada projeto...
